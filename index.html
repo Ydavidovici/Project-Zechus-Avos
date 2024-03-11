@@ -12,48 +12,56 @@
         <li><strong>Project Zechus Avos</strong></li>
     </ul>
     <ul>
-        <li><a href="#">Home</a></li>
-        <li><a href="#">About</a></li>
-        <li><a href="#" role="button">Sponsor a Chapter</a></li>
-        <li><a href="#">Contact Us</a></li>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#sponsor" role="button">Sponsor a Mitzvah</a></li>
+        <li><a href="#contact">Contact Us</a></li>
     </ul>
 </nav>
 <main class="container">
-    <div class="grid">
+    <div class="grid" id="about">
         <section>
-            <hgroup>
-                <h2>Welcome to Project Zechus Avos</h2>
-                <h3>Sponsor a Chapter of Our Book</h3>
-            </hgroup>
-            <p>This project aims to connect sponsors with chapters of a significant book, allowing each chapter to be sponsored uniquely. Your sponsorship will help bring this important work to a wider audience and ensure its success.</p>
-            <figure>
-                <img src="https://source.unsplash.com/random/400x300?book" alt="A book representing the project" />
-                <figcaption>Sponsorship opportunities available</figcaption>
-            </figure>
-            <h3>Available Chapters</h3>
-            <p>List of chapters will be dynamically updated to show available sponsorship opportunities.</p>
+            <h1>Welcome to Project Zechus Avos</h1>
+            <h2>About the Project</h2>
+            <p>Project Zechus Avos is a project to republish the groundbreaking 
+                sefer Mekor Habracha, written by the Skolya Rebbe's grandfather, 
+                R' Dovid Yitzchak Isaac. The sefer is a commentary on the first 3 words 
+                of the torah, and he darshens 42 mitzvos from those 3 words. It is a 
+                must-have for anyone interested in the deeper meaning of the torah.
+                With your help, we can make this project a reality. 
+                Sponsor a chapter today!</p>
+                <figure>
+                    <img src="Skolya-Rebbe.jpeg" alt="R' Dovid Yitzchak Issac, The Skolye Rebbe" />
+                    <figcaption>R' Dovid Yitzchak Issac, The Skolye Rebbe</figcaption>
+                </figure>
         </section>
     </div>
-</main>
-<section aria-label="Subscribe example">
-    <div class="container">
-        <article>
+    <div class="grid" id="sponsor">
+        <section>
             <hgroup>
-                <h2>Get Involved</h2>
-                <h3>Stay Updated</h3>
+                <h2>Sponsor a Mitzva</h2>
             </hgroup>
-            <form class="grid">
-                <input type="text" id="firstname" name="firstname" placeholder="First Name" aria-label="First Name" required />
-                <input type="email" id="email" name="email" placeholder="Email Address" aria-label="Email Address" required />
-                <button type="submit" onclick="event.preventDefault()">Subscribe</button>
-            </form>
-        </article>
+            <p>With this project, the Skolya Rebbe is republishing Mekor Habracha, the 
+                ground-breaking sefer on the first 3 words of the torah, written by the rebbe's
+                grandfather, R' Dovid Yitzchak Isaac. We need YOU to help make this happen.
+            </p>
+            <h3>Available Mitzvos</h3>
+            <p>List of Mitzvos will be dynamically updated to show available sponsorship opportunities.</p>
+        </section>
     </div>
-</section>
-<footer>
-    <small>
-        <a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a>
-    </small>
-</footer>
+    <div class="grid" id="contact">
+        <section>
+            <h2>Contact Us</h2>
+            <p>For more information, please contact us at:</p>
+            <p>Phone: 973-747-7186</p>
+            <p>Email: <a href="mailto:ydavidovici@gmail.com">ydavidovici@gmail.com</a></p>        
+        </section>
+    </div>
+    <footer>
+        <small>
+            <a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a>
+        </small>
+    </footer>
+</main>
 </body>
 </html>
