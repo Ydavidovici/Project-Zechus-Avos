@@ -56,3 +56,80 @@ footer small a {
     text-decoration: none;
     color: #333;
 }
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+  
+  .card:hover {
+    transform: scale(1.05);
+  }
+
+  .button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+  
+  .button:hover, .button:focus {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+  }
+  
+  .modal-content {
+    background-color: white;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 90%;
+  }
+
+
+  .fade-in {
+    animation: fadeIn 0.5s;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  :root {
+    --primary-color: #007bff;
+    --text-color: #333;
+    --background-color: #f8f9fa;
+  }
+  
+  body {
+    color: var(--text-color);
+    background-color: var(--background-color);
+  }
+  

@@ -1,28 +1,19 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Example function to add Mitzvot to the page
-    function loadMitzvot() {
-        const mitzvahList = document.getElementById('mitzvah-list');
-        // Example list of Mitzvot, in reality, this would come from the server
-        const mitzvot = [
-            { name: "Mitzvah 1", price: 180 },
-            { name: "Mitzvah 2", price: 180 },
-            // Add more Mitzvot here
-        ];
+// Example setup function
+function setup() {
+    // Code to run on every page load
+    initializeGlobalComponents();
+}
 
-        mitzvot.forEach(mitzvah => {
-            const div = document.createElement('div');
-            div.className = 'mitzvah';
-            div.textContent = `${mitzvah.name} - $${mitzvah.price}`;
-            div.addEventListener('click', () => sponsorMitzvah(mitzvah));
-            mitzvahList.appendChild(div);
-        });
-    }
+// Initialize global UI components (modals, navbars, etc.)
+function initializeGlobalComponents() {
+    // Setup logic here
+}
 
-    function sponsorMitzvah(mitzvah) {
-        console.log(`Sponsoring ${mitzvah.name}`);
-        // Here, you would trigger the Stripe Checkout flow
-        // This requires server-side interaction to create a Checkout Session
-    }
+// Utility function example
+function formatDate(dateString) {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+}
 
-    loadMitzvot();
-});
+// Run setup on load
+document.addEventListener('DOMContentLoaded', setup);
