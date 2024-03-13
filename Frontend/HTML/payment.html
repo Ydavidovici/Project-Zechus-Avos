@@ -1,0 +1,43 @@
+<!-- Include Stripe.js in your HTML header -->
+<script src="https://js.stripe.com/v3/"></script>
+
+<div id="card-element">
+  <!-- Elements will create input elements here -->
+</div>
+
+<button id="submit">Pay</button>
+
+<script>
+var stripe = Stripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
+var elements = stripe.elements();
+var card = elements.create('card');
+card.mount('#card-element');
+
+var form = document.getElementById('payment-form');
+form.addEventListener('submit', function(event) {
+  event.preventDefault();
+
+  stripe.createPaymentMethod({
+    type: 'card',
+    card: card,
+    billing_details: {
+      // Include any billing details here
+    },
+  }).then(function(result) {
+    if (result.error) {
+      // Display error.message in your UI
+    } else {
+      // You got a PaymentMethod reference, continue with the payment processing
+      fetch('/create-payment-intent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({paymentMethodId: result.paymentMethod.id}),
+      }).then(function(result) {
+        // Handle success or failure
+      });
+    }
+  });
+});
+</script>
