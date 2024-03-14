@@ -1,19 +1,10 @@
-// Example setup function
-function setup() {
-    // Code to run on every page load
-    initializeGlobalComponents();
+function setupMainPageEventListeners() {
+    const viewAllButton = document.getElementById('view-all-sponsorships');
+    viewAllButton.addEventListener('click', () => {
+        window.location.href = '/sponsorships.html'; // Navigate to the sponsorships page
+    });
+    // Add other event listeners as needed for main page interactions
 }
 
-// Initialize global UI components (modals, navbars, etc.)
-function initializeGlobalComponents() {
-    // Setup logic here
-}
-
-// Utility function example
-function formatDate(dateString) {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-}
-
-// Run setup on load
-document.addEventListener('DOMContentLoaded', setup);
+// Assuming this is called either at the end of `init.js` or directly in your HTML
+setupMainPageEventListeners();
