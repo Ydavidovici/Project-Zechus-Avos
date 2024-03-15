@@ -42,7 +42,7 @@ nav ul li {
 
 nav ul li a {
   text-decoration: none;
-  color: #333; /* Ensuring contrast against the light gray nav background */
+  color: #a9a9a9; /* Ensuring contrast against the light gray nav background */
   font-weight: bold;
 }
 
@@ -63,7 +63,7 @@ h1, h2, h3, p, a {
 }
 
 a:link, a:visited {
-  color: #333; /* Adjust link colors */
+  color: #403d3d; /* Adjust link colors */
 }
 
 a:hover, a:active {

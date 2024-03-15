@@ -2,7 +2,6 @@
   "name": "backend",
   "version": "1.0.0",
   "main": "index.js",
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -19,6 +18,7 @@
     "content-type": "^1.0.5",
     "cookie": "^0.5.0",
     "cookie-signature": "^1.0.6",
+    "cors": "^2.8.5",
     "debug": "^2.6.9",
     "define-data-property": "^1.1.4",
     "depd": "^2.0.0",
@@ -67,6 +67,7 @@
     "set-function-length": "^1.2.2",
     "setprototypeof": "^1.2.0",
     "side-channel": "^1.0.6",
+    "sqlite3": "^5.1.7",
     "statuses": "^2.0.1",
     "stripe": "^14.20.0",
     "toidentifier": "^1.0.1",

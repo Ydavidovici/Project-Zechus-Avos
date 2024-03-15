@@ -1,0 +1,50 @@
+/* Sponsorships-specific styles */
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 40px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+#mitzvot-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.mitzvah-item {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 20px;
+    text-align: center;
+}
+
+.mitzvah-item h2 {
+    margin-top: 0;
+    color: #0056b3;
+}
+
+.mitzvah-item p {
+    font-size: 16px;
+    margin: 10px 0 20px;
+}
+
+.mitzvah-item .sponsor-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-transform: uppercase; /* Stylistic choice to make buttons stand out */
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.mitzvah-item .sponsor-button:hover, .mitzvah-item .sponsor-button:focus {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
