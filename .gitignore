@@ -320,5 +320,7 @@ poetry.toml
 pyrightconfig.json
 
 resetDb.js
-
+backend/src/.env
+Project-Zechus-Avos-backup.git/
+bfg.jar
 # End of https://www.toptal.com/developers/gitignore/api/python

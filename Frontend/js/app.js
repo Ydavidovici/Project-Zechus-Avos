@@ -1,3 +1,12 @@
+require('dotenv').config();
+
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const databaseUrl = process.env.DATABASE_URL;
+
+// Now you can use stripeSecretKey and databaseUrl in your code
+
+
+
 document.addEventListener('DOMContentLoaded', () => {
     // Check if we're on the sponsorships page and only then fetch and display mitzvot
     if (window.location.pathname.endsWith('sponsorships.html') || window.location.pathname.endsWith('sponsorships')) {
@@ -11,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function fetchAndDisplayMitzvot() {
-    fetch('http://localhost:3000/api/mitzvot')
+    fetch(`${process.env.API_URL}/mitzvot`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -25,7 +34,6 @@ function fetchAndDisplayMitzvot() {
             console.error('Error fetching mitzvot:', error);
         });
 }
-
 function renderMitzvot(mitzvot) {
     const listElement = document.getElementById('mitzvot-list');
     listElement.innerHTML = '';
