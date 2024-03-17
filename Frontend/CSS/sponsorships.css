@@ -47,4 +47,76 @@
 .mitzvah-item .sponsor-button:hover, .mitzvah-item .sponsor-button:focus {
     background-color: #0056b3;
     transform: translateY(-2px);
+    cursor: pointer;
+}
+
+.mitzvah-item:hover {
+    transform: scale(1.03); /* Slightly larger scale on hover */
+    z-index: 1; /* Ensure the enlarged item is above others */
+}
+
+
+.mitzvah-details {
+    display: none; /* Initially hidden */
+    background-color: #f9f9f9; /* Slightly off-white background for contrast */
+    border-top: 1px solid #eee; /* Visual separation from the summary */
+    padding: 15px;
+    margin-top: 20px; /* Space from the main content */
+    border-radius: 0 0 8px 8px; /* Continue the border-radius on the bottom */
+}
+
+.mitzvah-modal {
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.mitzvah-modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    border-radius: 8px;
+}
+
+.close-modal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-modal:hover, .close-modal:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.mitzvah-details.hidden {
+    display: none;
+}
+
+.mitzvah-item.expanded .mitzvah-details {
+    display: block; /* Show the detailed info */
+    padding: 20px;
+    background-color: #f8f8f8; /* Slightly different background for emphasis */
+    border-top: 1px solid #ddd; /* Visually separate summary from details */
+}
+
+.mitzvah-item.expanded {
+    transform: scale(1.1); /* Enlarge the item for focus */
+    z-index: 2; /* Ensure it's above other items */
+    position: relative; /* Needed for z-index to take effect */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* More pronounced shadow for focus */
+}
+
+.mitzvah-modal.hidden {
+    display: none;
 }

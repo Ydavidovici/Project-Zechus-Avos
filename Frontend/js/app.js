@@ -1,11 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Check if we're on the sponsorships page and only then fetch and display mitzvot
-    if (window.location.pathname.endsWith('sponsorships.html')) {
+    if (window.location.pathname.endsWith('sponsorships.html') || window.location.pathname.endsWith('sponsorships')) {
         fetchAndDisplayMitzvot();
     }
 
     // Setup listeners for the main page if needed
     setupMainPageEventListeners();
+    // Setup to close modal when clicking outside of the modal content
+    setupModalClose();
 });
 
 function fetchAndDisplayMitzvot() {
@@ -16,50 +18,85 @@ function fetchAndDisplayMitzvot() {
             }
             return response.json();
         })
-        .then(responseObject => { // Changed variable name for clarity
-            renderMitzvot(responseObject.data); // Pass the 'data' array to the render function
+        .then(responseObject => {
+            renderMitzvot(responseObject.data);
         })
         .catch(error => {
             console.error('Error fetching mitzvot:', error);
         });
 }
 
-
 function renderMitzvot(mitzvot) {
-    const listElement = document.getElementById('mitzvot-list'); // Ensure this ID matches your HTML
-    listElement.innerHTML = ''; // Clear existing content
+    const listElement = document.getElementById('mitzvot-list');
+    listElement.innerHTML = '';
     mitzvot.forEach(mitzvah => {
         const itemElement = document.createElement('div');
         itemElement.className = 'mitzvah-item';
         itemElement.innerHTML = `
-            <h2>${mitzvah.name}</h2>
-            <p>${mitzvah.description}</p>
-            <button class="sponsor-button" data-mitzvah-id="${mitzvah.id}">Sponsor</button>
+            <div class="mitzvah-summary">
+                <h2>${mitzvah.name}</h2>
+                <p>${mitzvah.description}</p>
+            </div>
         `;
-        listElement.appendChild(itemElement);
-    });
+        const sponsorButton = document.createElement('button');
+        sponsorButton.className = 'sponsor-button';
+        sponsorButton.textContent = 'Sponsor';
+        sponsorButton.dataset.mitzvahId = mitzvah.id;
+        
+        itemElement.appendChild(sponsorButton);
 
-    // Set up event listeners for the sponsor buttons
-    setupSponsorButtons();
+        listElement.appendChild(itemElement);
+
+        // Click event for showing modal details
+        itemElement.addEventListener('click', function() {
+            showModal(mitzvah);
+        });
+
+        sponsorButton.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent triggering the item's click event
+            console.log('Sponsorship for mitzvah:', this.dataset.mitzvahId);
+            // Here, you can implement further sponsorship functionality, such as opening a Stripe checkout
+        });
+    });
 }
 
 function setupSponsorButtons() {
-    const buttons = document.querySelectorAll('.sponsor-button');
-    buttons.forEach(button => {
-        button.addEventListener('click', (e) => {
-            const mitzvahId = e.target.getAttribute('data-mitzvah-id');
-            console.log('Sponsorship for mitzvah:', mitzvahId);
-            // Here you could implement functionality to handle sponsorship, like opening a Stripe checkout
-        });
-    });
+    // This function might not be necessary if sponsor button setup is moved into renderMitzvot
 }
 
 function setupMainPageEventListeners() {
-    // Implement this if there are specific listeners needed for the main page
     const viewAllButton = document.getElementById('view-all-sponsorships');
     if (viewAllButton) {
         viewAllButton.addEventListener('click', () => {
-            window.location.href = 'sponsorships.html'; // Adjust if the path needs to be different
+            window.location.href = 'sponsorships.html';
         });
     }
+}
+
+function showModal(mitzvah) {
+    const modal = document.getElementById('mitzvahModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDescription = document.getElementById('modalDescription');
+
+    modalTitle.textContent = mitzvah.name;
+    modalDescription.textContent = mitzvah.description;
+
+    modal.classList.remove('hidden');
+}
+
+function hideModal() {
+    const modal = document.getElementById('mitzvahModal');
+    modal.classList.add('hidden');
+}
+
+function setupModalClose() {
+    const modal = document.getElementById('mitzvahModal');
+    modal.querySelector('.close-modal').addEventListener('click', hideModal);
+
+    // Close modal when clicking outside of the modal content
+    window.addEventListener('click', function(event) {
+        if (event.target == modal) {
+            hideModal();
+        }
+    });
 }
