@@ -3,8 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.location.pathname.endsWith('sponsorships.html') || window.location.pathname.endsWith('sponsorships')) {
         fetchAndDisplayMitzvot();
         setupStripe();
+        setupModalInteractions();
     }
-    setupModalInteractions();
 });
 
 function fetchAndDisplayMitzvot() {
@@ -95,8 +95,9 @@ function setupStripe() {
           // Handle error in creating payment intent
           console.error('Failed to create payment intent.');
         }
-      });
-      
+    });
+} // Missing closing brace added here
+
 function setupModalInteractions() {
     // Handle closing sponsorship modal
     document.querySelector('.close').addEventListener('click', () => {
@@ -113,7 +114,7 @@ function setupModalInteractions() {
 
 function openSponsorModal(mitzvahId) {
     // Populate modal with relevant mitzvah details if necessary
-    // Example: document.getElementById('mitzvahIdField').value = mitzvahId;
+    document.getElementById('mitzvahIdField').value = mitzvahId; // mitzvahId used here
     document.getElementById('sponsorModal').style.display = 'block';
 }
 
