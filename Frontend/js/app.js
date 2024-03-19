@@ -1,23 +1,28 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize actions only if on the sponsorship page.
     if (window.location.pathname.endsWith('sponsorships.html') || window.location.pathname.endsWith('sponsorships')) {
         fetchAndDisplayMitzvot();
         setupStripe();
         setupModalInteractions();
     }
 });
-
 function fetchAndDisplayMitzvot() {
-    // Fetch mitzvot from your API and display them.
-    // Example API call:
-    fetch('http://localhost:3000/api/mitzvot')
+    fetch('http://localhost:3005/api/mitzvot')
         .then(response => response.json())
-        .then(data => renderMitzvot(data.mitzvot))
+        .then(data => {
+            // Access the 'data' property of the response to get the mitzvot array
+            renderMitzvot(data.data); // Adjust this line accordingly
+        })
         .catch(error => console.error('Error fetching mitzvot:', error));
 }
 
+
 function renderMitzvot(mitzvot) {
     const listElement = document.getElementById('mitzvot-list');
+    if (!listElement) {
+        console.error('Mitzvot list element not found');
+        return;
+    }
+
     listElement.innerHTML = '';
 
     mitzvot.forEach(mitzvah => {
@@ -40,82 +45,73 @@ function renderMitzvot(mitzvot) {
 }
 
 function setupStripe() {
-    const stripe = Stripe('pk_test_YourPublishableKeyHere'); // Replace with your actual key
+    const stripe = Stripe('pk_test_51OttAEBCnbGynt76qe6NPybRBhwjR7NPeSsZhBt3ATCRZERVYZdrL6Texwkp5yL120pYbyHOO44D4awkfnxCyTJ500UMCypzs0');
     const elements = stripe.elements();
     const card = elements.create('card');
     card.mount('#card-element');
 
     card.on('change', ({error}) => {
         const displayError = document.getElementById('card-errors');
-        if (error) {
-            displayError.textContent = error.message;
-        } else {
-            displayError.textContent = '';
-        }
+        displayError.textContent = error ? error.message : '';
     });
 
     document.getElementById('payment-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-      
-        // Set the amount for the sponsorship
-        let amount = 5000; // $50 in cents
-      
-        // Call your server endpoint to create a payment intent
+
+        let amount = document.getElementById('amount').value || '5000'; // Example fallback amount
+
         const response = await fetch('/create-payment-intent', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ amount: amount }),
-        });
-        const data = await response.json();
-      
-        if (data.clientSecret) {
-          // Proceed with the payment using the client secret
-          const result = await stripe.confirmCardPayment(data.clientSecret, {
-            payment_method: {
-              card: card,
-              billing_details: {
-                // Include billing details here
-              },
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
             },
-          });
-      
-          if (result.error) {
-            // Handle errors in payment
-            console.log(result.error.message);
-          } else {
-            if (result.paymentIntent.status === 'succeeded') {
-              // Payment was successful
-              console.log('Payment succeeded!');
-              // Show a success message or redirect to a success page
+            body: JSON.stringify({amount: amount})
+        });
+
+        const data = await response.json();
+
+        if (data.clientSecret) {
+            const result = await stripe.confirmCardPayment(data.clientSecret, {
+                payment_method: {
+                    card: card,
+                    billing_details: {}
+                },
+            });
+
+            if (result.error) {
+                console.error(result.error.message);
+            } else {
+                if (result.paymentIntent.status === 'succeeded') {
+                    alert('Thank you for your sponsorship!');
+                    document.getElementById('sponsorModal').style.display = 'none';
+                }
             }
-          }
         } else {
-          // Handle error in creating payment intent
-          console.error('Failed to create payment intent.');
+            console.error('Failed to create payment intent.');
         }
     });
-} // Missing closing brace added here
+}
 
 function setupModalInteractions() {
-    // Handle closing sponsorship modal
-    document.querySelector('.close').addEventListener('click', () => {
-        document.getElementById('sponsorModal').style.display = 'none';
+    const closeButtons = document.querySelectorAll('.close-modal');
+    closeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            document.getElementById('sponsorModal').classList.add('hidden');
+        });
     });
 
-    // Close modal when clicking outside of it
     window.addEventListener('click', (event) => {
-        if (event.target == document.getElementById('sponsorModal')) {
-            document.getElementById('sponsorModal').style.display = 'none';
+        if (event.target === document.getElementById('sponsorModal')) {
+            document.getElementById('sponsorModal').classList.add('hidden');
         }
     });
 }
 
 function openSponsorModal(mitzvahId) {
-    // Populate modal with relevant mitzvah details if necessary
-    document.getElementById('mitzvahIdField').value = mitzvahId; // mitzvahId used here
-    document.getElementById('sponsorModal').style.display = 'block';
+    const modal = document.getElementById('sponsorModal');
+    if (modal) {
+        modal.style.display = 'block';
+    } else {
+        console.error('Sponsor modal not found');
+    }
 }
-
-// Add any additional unchanged functions or utilities below as necessary.

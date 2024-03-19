@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../CSS/index.css">
     <link rel="stylesheet" href="../CSS/sponsorships.css">
-    <title>Sponsor a Mitzvah - Project Zechus Avos</title>
+    <title>Available Sponsorships - Project Zechus Avos</title>
     <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
@@ -13,25 +13,44 @@
         <ul>
             <li><a href="index.html">Home</a></li>
             <li><a href="#about">About</a></li>
-            <li><a href="sponsorships.html">Sponsor a Mitzvah</a></li>
+            <li><a class="active" href="sponsorships.html">Sponsorships</a></li>
             <li><a href="#contact">Contact Us</a></li>
         </ul>
     </nav>
     <main class="container">
-        <h1>Sponsor a Mitzvah</h1>
-        <div id="mitzvot-list">
-            <!-- Dynamically populated list of mitzvot will be here -->
-        </div>
+        <h1>Available Sponsorships</h1>
+        <section id="sponsorships-list">
+            <div class="sponsorship-option">
+                <h2>Mitzvah Sponsorships</h2>
+                <p>Select a mitzvah to sponsor.</p>
+                <div id="mitzvot-list">
+                    <!-- Dynamically generated mitzvah sponsorships will be inserted here -->
+                </div>
+            </div>
+            <div class="sponsorship-option">
+                <h2>Cover Sponsorship - $18,000</h2>
+                <p>Sponsor the cover and receive 3 pages of dedications.</p>
+                <button onclick="openSponsorModal('cover')">Sponsor the Cover</button>
+            </div>
+            <div class="sponsorship-option">
+                <h2>Dedication Page - $180</h2>
+                <p>Contribute towards a dedication page.</p>
+                <button onclick="openSponsorModal('dedicationPage')">Sponsor a Page</button>
+            </div>
+            <div class="sponsorship-option">
+                <h2>General Donation</h2>
+                <p>Support the project with a donation of any amount.</p>
+                <button onclick="openSponsorModal('general')">Donate Now</button>
+            </div>
+        </section>
         <!-- Sponsorship Modal -->
         <div id="sponsorModal" class="modal hidden">
             <div class="modal-content">
                 <span class="close-modal">&times;</span>
                 <form id="payment-form">
-                    <div id="card-element">
-                        <!-- Stripe Elements will go here -->
-                    </div>
-                    <button id="submit">Sponsor Now</button>
+                    <div id="card-element"><!-- Stripe Elements will go here --></div>
                     <div id="card-errors" role="alert"></div>
+                    <button id="submit">Sponsor Now</button>
                 </form>
             </div>
         </div>
