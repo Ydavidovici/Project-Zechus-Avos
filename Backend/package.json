@@ -69,7 +69,7 @@
     "side-channel": "^1.0.6",
     "sqlite3": "^5.1.7",
     "statuses": "^2.0.1",
-    "stripe": "^14.20.0",
+    "stripe": "^14.21.0",
     "toidentifier": "^1.0.1",
     "type-is": "^1.6.18",
     "undici-types": "^5.26.5",

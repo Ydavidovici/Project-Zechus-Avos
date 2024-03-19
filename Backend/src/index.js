@@ -1,12 +1,16 @@
+// index.js
 const express = require('express');
-const app = express();
 const cors = require('cors');
-app.use(cors());
+const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Correctly requiring the sponsorships routes
+// Import the database initialization script
+require('./db/server.js');
+
+// Import routes
 const sponsorshipsRoutes = require('./routes/sponsorships.js');
 
+app.use(cors());
 app.use(express.json());
 app.use('/api', sponsorshipsRoutes);
 

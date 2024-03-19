@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../CSS/index.css">
-    <link rel="stylesheet" href="../CSS/sponsorships.css"> <!-- Sponsorships-specific styles -->
+    <link rel="stylesheet" href="../CSS/sponsorships.css">
     <title>Sponsor a Mitzvah - Project Zechus Avos</title>
     <script src="https://js.stripe.com/v3/"></script>
 </head>
@@ -19,16 +19,20 @@
     </nav>
     <main class="container">
         <h1>Sponsor a Mitzvah</h1>
-        <div id="mitzvot-list"></div>
-        <!-- Dynamically populated list of mitzvot -->
+        <div id="mitzvot-list">
+            <!-- Dynamically populated list of mitzvot will be here -->
         </div>
-        <!-- The Modal -->
-        <div id="mitzvahModal" class="mitzvah-modal hidden">
-            <div class="mitzvah-modal-content">
+        <!-- Sponsorship Modal -->
+        <div id="sponsorModal" class="modal hidden">
+            <div class="modal-content">
                 <span class="close-modal">&times;</span>
-                <h2 id="modalTitle">Mitzvah Title</h2>
-                <p id="modalDescription">Mitzvah description...</p>
-                <!-- Add more modal content here as needed -->
+                <form id="payment-form">
+                    <div id="card-element">
+                        <!-- Stripe Elements will go here -->
+                    </div>
+                    <button id="submit">Sponsor Now</button>
+                    <div id="card-errors" role="alert"></div>
+                </form>
             </div>
         </div>
     </main>
