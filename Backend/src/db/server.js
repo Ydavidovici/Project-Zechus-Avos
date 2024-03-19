@@ -101,7 +101,7 @@ app.post('/create-payment-intent', async (req, res) => {
 });
 
 // Listen to the App Engine-specified port, or 3000 otherwise
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
