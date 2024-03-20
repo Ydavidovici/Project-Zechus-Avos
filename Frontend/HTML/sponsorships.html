@@ -22,37 +22,42 @@
         <section id="sponsorships-list">
             <div class="sponsorship-option">
                 <h2>Mitzvah Sponsorships</h2>
-                <p>Select a mitzvah to sponsor.</p>
+                <p>Select a mitzvah to sponsor from the list below.</p>
                 <div id="mitzvot-list">
                     <!-- Dynamically generated mitzvah sponsorships will be inserted here -->
                 </div>
             </div>
-            <div class="sponsorship-option">
-                <h2>Cover Sponsorship - $18,000</h2>
-                <p>Sponsor the cover and receive 3 pages of dedications.</p>
-                <button onclick="openSponsorModal('cover')">Sponsor the Cover</button>
-            </div>
-            <div class="sponsorship-option">
-                <h2>Dedication Page - $180</h2>
-                <p>Contribute towards a dedication page.</p>
-                <button onclick="openSponsorModal('dedicationPage')">Sponsor a Page</button>
-            </div>
-            <div class="sponsorship-option">
-                <h2>General Donation</h2>
-                <p>Support the project with a donation of any amount.</p>
-                <button onclick="openSponsorModal('general')">Donate Now</button>
-            </div>
+            <!-- Additional sponsorship options if necessary -->
         </section>
         <!-- Sponsorship Modal -->
-        <div id="sponsorModal" class="modal hidden">
+        <div id="sponsorModal" class="mitzvah-modal hidden">
             <div class="modal-content">
                 <span class="close-modal">&times;</span>
+                <div id="mitzvah-description">Mitzvah description will appear here.</div>
                 <form id="payment-form">
                     <div id="card-element"><!-- Stripe Elements will go here --></div>
                     <div id="card-errors" role="alert"></div>
-                    <button id="submit">Sponsor Now</button>
+                    <input type="hidden" id="amount" name="amount">
+                    <button type="submit" id="submit">Sponsor Now</button>
                 </form>
             </div>
+        </div>
+        <div class="sponsorship-option">
+            <h2>Book Cover Sponsorship</h2>
+            <p>Sponsor the cover of the book for $18,000.</p>
+            <button class="sponsor-button">Sponsor Now</button>
+        </div>
+
+        <div class="sponsorship-option">
+            <h2>Dedications Page Sponsorship</h2>
+            <p>Sponsor the dedications page for $180.</p>
+            <button class="sponsor-button">Sponsor Now</button>
+        </div>
+
+        <div class="sponsorship-option">
+            <h2>General Donations</h2>
+            <p>Make a general donation to support our cause.</p>
+            <button class="sponsor-button">Donate Now</button>
         </div>
     </main>
     <footer>
@@ -60,6 +65,6 @@
             <a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a>
         </small>
     </footer>
-    <script src="../js/app.js"></script>
+    <script src="/Websites/Project_Zechus_Avos/Frontend/js/app.js"></script>
 </body>
 </html>
