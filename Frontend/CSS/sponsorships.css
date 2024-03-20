@@ -98,3 +98,36 @@
 .mitzvah-item:hover {
     transform: scale(1.03);
 }
+
+.sponsorship-option {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.sponsorship-option h2 {
+    color: #333;
+    font-size: 1.5em;
+}
+
+.sponsorship-option p {
+    color: #666;
+    font-size: 1em;
+}
+
+.sponsor-button {
+    padding: 10px 20px;
+    color: #fff;
+    background-color: #333;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.sponsor-button:hover {
+    background-color: #666;
+}
