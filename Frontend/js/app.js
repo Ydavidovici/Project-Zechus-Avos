@@ -53,3 +53,28 @@ function setupStripe() {
     });
 }
 
+
+document.getElementById('mitzvot-list').addEventListener('click', function(event) {
+    // Check if the clicked element is a mitzvah
+    if (event.target.classList.contains('mitzvah')) {
+        // Perform your changes here
+        event.target.style.color = 'red';
+    }
+});
+
+function openSponsorModal(id, name, description) {
+    // Get the modal element
+    const modal = document.getElementById('sponsor-modal');
+
+    if (modal === null) {
+        console.error('No element with id "sponsor-modal" found');
+        return;
+    }
+
+    // Populate the modal with the mitzvah details
+    modal.querySelector('.mitzvah-name').textContent = name;
+    modal.querySelector('.mitzvah-description').textContent = description;
+
+    // Show the modal
+    modal.style.display = 'block';
+}
