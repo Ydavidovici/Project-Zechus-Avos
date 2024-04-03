@@ -3,7 +3,7 @@ const { window } = new JSDOM('<!doctype html><html><body><div id="highlighted-mi
 global.document = window.document;
 global.fetch = require('jest-fetch-mock');
 
-const { fetchHighlightedMitzvot, renderHighlightedMitzvot } = require('/Users/yaakovdavidovici/Coding/Websites/Project_Zechus_Avos/Frontend/js/init.js');
+const { fetchHighlightedMitzvot, renderHighlightedMitzvot } = require('../Frontend/js/init');
 
 describe('fetchHighlightedMitzvot', () => {
     beforeEach(() => {

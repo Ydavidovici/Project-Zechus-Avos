@@ -6,7 +6,7 @@ const { JSDOM } = jsdom;
 global.document = new JSDOM('<!doctype html><html><body><div id="mitzvot-list"></div></body></html>').window.document;
 
 // Import the function to test
-const { renderMitzvot } = require('./app.js');
+const { renderMitzvot } = require('../Frontend/js/app');
 
 describe('renderMitzvot', () => {
     it('should render mitzvot correctly', () => {

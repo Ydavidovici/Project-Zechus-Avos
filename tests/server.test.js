@@ -1,5 +1,5 @@
 const process = require('process');
-const server = require('/Users/yaakovdavidovici/Coding/Websites/Project_Zechus_Avos/Backend/src/db/server.js');
+const server = require('../Backend/src/db/server');
 
 describe('Server Port Configuration', () => {
   test('should use environment variable for PORT if set', () => {

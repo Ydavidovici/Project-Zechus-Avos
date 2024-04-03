@@ -2,7 +2,7 @@
 
 const request = require('supertest');
 const express = require('express');
-const sponsorshipsRoutes = require('../src/routes/sponsorships');
+const sponsorshipsRoutes = require('../Backend/src/routes/sponsorships');
 const app = express();
 app.use(express.json());
 app.use('/', sponsorshipsRoutes);

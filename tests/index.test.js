@@ -1,6 +1,6 @@
 // index.test.js
 const request = require('supertest');
-const app = require('./index');
+const app = require('../Backend/src/index');
 
 describe('GET /api', () => {
   it('responds with a 200 status', async () => {
