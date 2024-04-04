@@ -1,10 +1,12 @@
-document.addEventListener('DOMContentLoaded', () => {
-    if (window.location.pathname.endsWith('sponsorships.html') || window.location.pathname.endsWith('sponsorships')) {
-        fetchAndDisplayMitzvot();
-        setupStripe();
-        setupModalInteractions();
-    }
-});
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.location.pathname.endsWith('sponsorships.html') || window.location.pathname.endsWith('sponsorships')) {
+            fetchAndDisplayMitzvot();
+            setupStripe();
+            setupModalInteractions();
+        }
+    });
+}
 
 function fetchAndDisplayMitzvot() {
     console.log("Fetching mitzvot from API");
@@ -18,23 +20,27 @@ function fetchAndDisplayMitzvot() {
 }
 
 function renderMitzvot(mitzvot) {
-    const listElement = document.getElementById('mitzvot-list');
-    listElement.innerHTML = '';
-    mitzvot.forEach(mitzvah => {
-        console.log("Processing mitzvah: ", mitzvah.name);
-        const itemElement = document.createElement('div');
-        itemElement.className = 'mitzvah-item';
-        itemElement.innerHTML = `
-            <h2>${mitzvah.name}</h2>
-            <p>${mitzvah.description}</p>
-            <button class="sponsor-button" data-mitzvah-id="${mitzvah.id}" data-mitzvah-name="${mitzvah.name}">Sponsor</button>
-        `;
-        itemElement.addEventListener('click', function() {
-            openSponsorModal(mitzvah.id, mitzvah.name, mitzvah.description);
+    if (typeof document !== 'undefined') {
+        const listElement = document.getElementById('mitzvot-list');
+        listElement.innerHTML = '';
+        mitzvot.forEach(mitzvah => {
+            console.log("Processing mitzvah: ", mitzvah.name);
+            const itemElement = document.createElement('div');
+            itemElement.className = 'mitzvah-item';
+            itemElement.innerHTML = `
+                <h2>${mitzvah.name}</h2>
+                <p>${mitzvah.description}</p>
+                <button class="sponsor-button" data-mitzvah-id="${mitzvah.id}" data-mitzvah-name="${mitzvah.name}">Sponsor</button>
+            `;
+            itemElement.addEventListener('click', function() {
+                openSponsorModal(mitzvah.id, mitzvah.name, mitzvah.description);
+            });
+            listElement.appendChild(itemElement);
         });
-        listElement.appendChild(itemElement);
-    });
+    }
 }
+
+// Rest of your code...
 
 function setupStripe() {
     const stripe = Stripe('your_stripe_public_key');
@@ -78,3 +84,5 @@ function openSponsorModal(id, name, description) {
     // Show the modal
     modal.style.display = 'block';
 }
+
+module.exports = { renderMitzvot };
