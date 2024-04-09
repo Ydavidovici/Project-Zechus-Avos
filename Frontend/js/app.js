@@ -1,3 +1,36 @@
+require('dotenv').config();
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetchHighlightedMitzvot().then(renderHighlightedMitzvot);
+});
+
+async function fetchHighlightedMitzvot() {
+    const response = await fetch('/api/highlighted-mitzvot');
+    if (!response.ok) throw new Error('Network response was not ok');
+    const data = await response.text();
+    if (!data) throw new Error('Empty response');
+    try {
+        return JSON.parse(data);
+    } catch (error) {
+        throw new Error('Invalid JSON in response: ' + error.message);
+    }
+}
+
+function renderHighlightedMitzvot(mitzvot) {
+    // Assume we have a <div id="highlighted-mitzvot"></div> for this purpose
+    const container = document.getElementById('highlighted-mitzvot');
+    mitzvot.forEach(mitzvah => {
+        const mitzvahElement = document.createElement('div');
+        mitzvahElement.innerHTML = `
+            <h3>${mitzvah.name}</h3>
+            <p>${mitzvah.description}</p>
+        `;
+        container.appendChild(mitzvahElement);
+    });
+}
+
+
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     document.addEventListener('DOMContentLoaded', () => {
         if (window.location.pathname.endsWith('sponsorships.html') || window.location.pathname.endsWith('sponsorships')) {
@@ -39,8 +72,6 @@ function renderMitzvot(mitzvot) {
         });
     }
 }
-
-// Rest of your code...
 
 function setupStripe() {
     const stripe = Stripe('your_stripe_public_key');
