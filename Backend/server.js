@@ -121,6 +121,20 @@ app.get('/sponsor_info/:mitzvah_id', (req, res) => {
     });
 });
 
+app.get('/api/admin', (req, res) => {
+    const sql = `
+        SELECT mitzvot.id, mitzvot.name, mitzvot.description, mitzvot.sponsored, sponsor_info.sponsor_name, sponsor_info.sponsored_for
+        FROM mitzvot
+        LEFT JOIN sponsor_info ON mitzvot.id = sponsor_info.mitzvah_id
+    `;
+    db.all(sql, [], (err, rows) => {
+        if (err) {
+            res.status(500).send('Error querying admin data');
+        } else {
+            res.json(rows);
+        }
+    });
+});
 
 // Listen to the App Engine-specified port, or 3000 otherwise
 const PORT = process.env.PORT || 3000;
