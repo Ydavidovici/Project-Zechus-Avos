@@ -95,3 +95,139 @@ footer {
     margin: 20px auto; /* Ensure consistent margin for smaller screens */
   }
 }
+/* Sponsorships-specific styles */
+.container {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 40px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#mitzvos-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.mitzvah-container {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  padding: 20px;
+  text-align: center;
+}
+
+.mitzvah-container h2 {
+  margin-top: 0;
+  color: #0056b3;
+}
+
+.mitzvah-container p {
+  font-size: 16px;
+  margin: 10px 0 20px;
+}
+
+.mitzvah-container .sponsor-button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.mitzvah-container .sponsor-button:hover, 
+.mitzvah-container .sponsor-button:focus {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.mitzvah-modal {
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.mitzvah-modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 50%;
+  border-radius: 10px;
+}
+
+.close-modal {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close-modal:hover, 
+.close-modal:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.sponsor-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#sponsor-modal {
+  display: none;
+}
+
+.mitzvah-container:hover {
+  transform: scale(1.03);
+}
+
+.sponsorship-option {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.sponsorship-option h2 {
+  color: #333;
+  font-size: 1.5em;
+}
+
+.sponsorship-option p {
+  color: #666;
+  font-size: 1em;
+}
+
+.sponsor-button {
+  padding: 10px 20px;
+  color: #fff;
+  background-color: #333;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.sponsor-button:hover {
+  background-color: #666;
+}
+
+
+

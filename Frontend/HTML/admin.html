@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../CSS/index.css">
-    <link rel="stylesheet" href="../CSS/sponsorships.css">
     <title>Admin - Project Zechus Avos</title>
     <script src="https://js.stripe.com/v3/"></script>
 </head>
@@ -12,8 +11,8 @@
     <nav>
         <ul>
             <li><a href="index.html">Home</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="sponsorships.html">Sponsorships</a></li>
+            <li><a href="mekor-habracha.html">Mekor Habracha</a></li>
+            <li><a href="siach-eliezer.html">Siach Eliezer</a></li>
             <li><a href="contact.html">Contact Us</a></li>
         </ul>
     </nav>
@@ -23,6 +22,9 @@
             <h2>Admin Panel</h2>
             <p>Manage the Project Zechus Avos website here.</p>
             <div id="admin-options">
+                <div id="mitzvos-list">
+                    <!-- Dynamically generated mitzvah sponsorships will be inserted here -->
+                </div>
                 <button id="add-mitzvah">Add Mitzvah</button>
                 <button id="edit-mitzvah">Edit Mitzvah</button>
                 <button id="delete-mitzvah">Delete Mitzvah</button>

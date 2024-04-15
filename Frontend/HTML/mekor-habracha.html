@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../CSS/index.css">
-    <link rel="stylesheet" href="../CSS/sponsorships.css">
     <title>Available Sponsorships - Project Zechus Avos</title>
     <script src="https://js.stripe.com/v3/"></script>
 </head>
@@ -12,8 +11,7 @@
     <nav>
         <ul>
             <li><a href="index.html">Home</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="sponsorships.html">Sponsorships</a></li>
+            <li><a href="siach-eliezer.html">Siach Eliezer</a></li>
             <li><a href="contact.html">Contact Us</a></li>
         </ul>
     </nav>
@@ -23,7 +21,7 @@
             <div class="sponsorship-option">
                 <h2>Mitzvah Sponsorships</h2>
                 <p>Select a mitzvah to sponsor from the list below.</p>
-                <div id="mitzvot-list">
+                <div id="mitzvos-list">
                     <!-- Dynamically generated mitzvah sponsorships will be inserted here -->
                 </div>
             </div>
@@ -33,26 +31,47 @@
             <h2>Book Cover Sponsorship</h2>
             <p>Sponsor the cover of the book for $18,000.</p>
             <p>Includes 3 full pages of dedications inside the book.</p>
-            <button class="sponsor-button">Sponsor Now</button>
+            <button class="sponsor-button" onclick="openForm('Book Cover Sponsorship')">Sponsor Now</button>
         </div>
 
         <div class="sponsorship-option">
             <h2>Dedications Page Sponsorship</h2>
-            <p>Sponsor the dedications page for $180.</p>
-            <button class="sponsor-button">Sponsor Now</button>
+            <p>Any donations of 180$ and up are in the dedications page.</p>
+            <button class="sponsor-button" onclick="openForm('Dedications Page Sponsorship')">Sponsor Now</button>
         </div>
 
         <div class="sponsorship-option">
             <h2>General Donations</h2>
             <p>Make a general donation to support our cause.</p>
-            <button class="sponsor-button">Donate Now</button>
+            <button class="sponsor-button" onclick="openForm('General Donations')">Donate Now</button>
         </div>
     </main>
+
+    <!-- The modal -->
+    <div id="sponsor-modal" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="form-title">Donate or Sponsor</h2>
+            <p id="mitzvah-description"></p>
+            <form id="donation-form" onsubmit="event.preventDefault(); submitForm();">
+                <label for="name">Name:</label><br>
+                <input type="text" id="name" name="name"><br>
+                <label for="phone">Phone Number:</label><br>
+                <input type="tel" id="phone" name="phone"><br>
+                <label for="email">Email:</label><br>
+                <input type="email" id="email" name="email"><br>
+                <label for="sponsoredFor">Sponsoring For:</label><br>
+                <input type="text" id="sponsoredFor" name="sponsoredFor"><br>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
     <footer>
         <small>
             <a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a>
         </small>
     </footer>
-    <script src="/Websites/Project_Zechus_Avos/Frontend/js/app.js"></script>
+    <script src="../Js/app.js"></script>
 </body>
 </html>
