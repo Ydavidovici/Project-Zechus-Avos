@@ -73,8 +73,6 @@ INSERT INTO mekor_habracha (type, name) VALUES
 
 COMMIT;
 
-
-
 BEGIN TRANSACTION;
 
 INSERT INTO siach_eliezer (type, name) VALUES

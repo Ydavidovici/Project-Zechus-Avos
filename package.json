@@ -2,13 +2,13 @@
   "name": "project_zechus_avos",
   "version": "1.0.0",
   "description": "",
-  "main": "backend/server.js",
+  "main": "index.js",
   "directories": {
     "test": "tests"
   },
   "scripts": {
-    "start": "node backend/db/server.js",
-    "dev": "nodemon backend/db/server.js",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "jest",
     "postinstall": "sqlite3 backend/db/mydatabase.db < backend/db/schema.sql"
   },
