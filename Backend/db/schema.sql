@@ -7,8 +7,6 @@ CREATE TABLE IF NOT EXISTS siach_eliezer (
     dedication TEXT     -- Nullable: additional dedication text if applicable
 );
 
-
--- Create the table, assuming it does not exist already
 CREATE TABLE IF NOT EXISTS mekor_habracha (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     type TEXT NOT NULL,  -- 'mitzvah', 'cover', 'dedication'

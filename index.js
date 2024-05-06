@@ -3,19 +3,15 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path'); 
 const sqlite3 = require('sqlite3').verbose();
-
-// Initialize express app
 const app = express();
 app.use(cors());
 app.use(express.json());
-
 app.use(express.static(path.join(__dirname, 'Frontend')));
-
 const fs = require('fs');
 
 function initializeDb() {
     console.log('Initializing database with schema and seed data');
-    const schemaPath = path.join(__dirname, 'schema.sql');
+    const schemaPath = path.join(__dirname, 'Backend/db', 'schema.sql');
     fs.readFile(schemaPath, 'utf8', (err, data) => {
         if (err) {
             console.error('Error reading schema.sql:', err.message);
@@ -40,9 +36,6 @@ const db = new sqlite3.Database('backend/db/mydatabase.db', sqlite3.OPEN_READWRI
         initializeDb(); 
     }
 });
-
-
-
 
 app.get('/api/mitzvos', (_req, res) => {
     db.all("SELECT * FROM mitzvos ORDER BY id", (err, rows) => {
