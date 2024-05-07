@@ -1,120 +1,172 @@
-require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
-const path = require('path'); 
 const sqlite3 = require('sqlite3').verbose();
+const cors = require('cors');
+const path = require('path');
 const app = express();
+const bcrypt = require('bcrypt');
+const PORT = process.env.PORT || 3000;
+const session = require('express-session');
+require('dotenv').config();  // Load environment variables
+
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: true }
+}));
+
+const db = new sqlite3.Database('./backend/db/pza.db', err => {
+    if (err) console.error('Error opening database ' + err.message);
+    else console.log('Database connected!');
+});
+
+const emailHelper = require('./utilities/emailHelper');
+const stripeHelper = require('./utilities/stripeHelper');
+const { formatDate, formatCurrency } = require('./utilities/dataFormatter');
+const webhookHelper = require('./utilities/webhookHelper');
+
+// Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'Frontend')));
-const fs = require('fs');
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public')); // Serve static files
 
-function initializeDb() {
-    console.log('Initializing database with schema and seed data');
-    const schemaPath = path.join(__dirname, 'Backend/db', 'schema.sql');
-    fs.readFile(schemaPath, 'utf8', (err, data) => {
-        if (err) {
-            console.error('Error reading schema.sql:', err.message);
-            return;
-        }
-        db.exec(data, (execErr) => {
-            if (execErr) {
-                console.error('Error executing schema:', execErr.message);
-            } else {
-                console.log('Database schema and seed data executed successfully');
-            }
-        });
+// Serve index.html as the main file
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'html', 'index.html'));
+});
+
+// Seforim CRUD operations
+app.get('/api/seforim', (req, res) => {
+    db.all("SELECT * FROM Seforim", [], (err, rows) => {
+        if (err) res.status(400).json({ "error": err.message });
+        else res.json({ "message": "success", "data": rows });
     });
-}
+});
 
-// Connect to the SQLite database and initialize it
-const db = new sqlite3.Database('backend/db/mydatabase.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
-    if (err) {
-        console.error('Error opening database', err.message);
-    } else {
-        console.log('Connected to the SQLite database.');
-        initializeDb(); 
+app.get('/api/seforim/:id', (req, res) => {
+    db.get("SELECT * FROM Seforim WHERE SeferID = ?", [req.params.id], (err, row) => {
+        if (err) res.status(400).json({ "error": err.message });
+        else res.json({ "message": "success", "data": row });
+    });
+});
+
+app.post('/api/seforim', (req, res) => {
+    const { SeferName } = req.body;
+    db.run("INSERT INTO Seforim (SeferName) VALUES (?)", [SeferName], function(err) {
+        if (err) res.status(400).json({ "error": err.message });
+        else res.json({ "message": "success", "data": this.lastID });
+    });
+});
+
+app.patch('/api/seforim/:id', (req, res) => {
+    db.run("UPDATE Seforim SET SeferName = ? WHERE SeferID = ?", [req.body.SeferName, req.params.id], function(err) {
+        if (err) res.status(400).json({ "error": err.message });
+        else res.json({ "message": "success", "data": this.changes });
+    });
+});
+
+app.delete('/api/seforim/:id', (req, res) => {
+    db.run("DELETE FROM Seforim WHERE SeferID = ?", [req.params.id], function(err) {
+        if (err) res.status(400).json({ "error": err.message });
+        else res.json({ "message": "deleted", "rows": this.changes });
+    });
+});
+
+// Sponsorships CRUD operations
+app.get('/api/sponsorships', (req, res) => {
+    db.all("SELECT * FROM Sponsorships", [], (err, rows) => {
+        if (err) res.status(400).json({ "error": err.message });
+        else res.json({ "message": "success", "data": rows.map(row => ({ ...row, Amount: formatCurrency(row.Amount) })) });
+    });
+});
+
+app.get('/api/sponsorships/:id', (req, res) => {
+    db.get("SELECT * FROM Sponsorships WHERE SponsorshipID = ?", [req.params.id], (err, row) => {
+        if (err) res.status(400).json({ "error": err.message });
+        else res.json({ "message": "success", "data": row });
+    });
+});
+
+app.post('/api/sponsorships', (req, res) => {
+    const { SeferID, Type, TypeDetail, IsSponsored, SponsorName, ForWhom, PaymentStatus } = req.body;
+    db.run("INSERT INTO Sponsorships (SeferID, Type, TypeDetail, IsSponsored, SponsorName, ForWhom, PaymentStatus) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [SeferID, Type, TypeDetail, IsSponsored ? 1 : 0, SponsorName, ForWhom, PaymentStatus], function(err) {
+            if (err) res.status(400).json({ "error": err.message });
+            else res.json({ "message": "success", "data": this.lastID });
+        });
+});
+
+// Payment Link API
+app.post('/api/create-payment-link', async (req, res) => {
+    const { description, amount, metadata } = req.body;
+    try {
+        const url = await stripeHelper.createPaymentLink(description, amount, metadata);
+        res.json({ "message": "success", "url": url });
+    } catch (error) {
+        res.status(500).json({ "message": "Stripe payment link creation failed", "error": error.message });
     }
 });
 
-app.get('/api/mitzvos', (_req, res) => {
-    db.all("SELECT * FROM mitzvos ORDER BY id", (err, rows) => {
+// Webhooks
+app.post('/webhooks/stripe', bodyParser.raw({type: 'application/json'}), (req, res) => {
+    const event = webhookHelper.constructEvent(req.body, req.headers['stripe-signature'], process.env.STRIPE_WEBHOOK_SECRET);
+    try {
+        webhookHelper.handleEvent(event);
+        res.status(200).json({ "received": true });
+    } catch (err) {
+        res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+});
+
+
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    // Assuming db.get() fetches your hashed password and compares it
+    db.get("SELECT password FROM Admins WHERE username = ?", [username], function(err, row) {
         if (err) {
-            console.error('Error querying mitzvos:', err.message);
-            return res.status(500).send('Error querying mitzvos');
+            return res.status(500).send("Internal server error");
         }
-        res.json({data: rows}); // Ensure consistent response structure
+        if (!row) {
+            return res.status(401).send("Invalid credentials");
+        }
+        bcrypt.compare(password, row.password, (err, result) => {
+            if (result) {
+                req.session.user = { username: username };
+                res.json({ success: true });
+            } else {
+                res.status(401).send("Invalid credentials");
+            }
+        });
     });
 });
 
-app.put('/api/mitzvos/:id', (req, res) => {
-    const { name, description, sponsored } = req.body;
-    const { id } = req.params;
-    const sql = "UPDATE mitzvos SET name = ?, description = ?, sponsored = ? WHERE id = ?";
-    db.run(sql, [name, description, sponsored, id], function(err) {
+function checkAuthentication(req, res, next) {
+    if (req.session.user && req.session.user.username) {
+        next(); // User is logged in, proceed to the next function (or route)
+    } else {
+        res.redirect('/login.html'); // User is not logged in, redirect to login page
+    }
+}
+
+// Use the middleware to protect the admin page route
+app.get('/admin.html', checkAuthentication, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'html', 'admin.html'));
+});
+
+app.use('/admin/*', checkAuthentication); // Protect all routes under /admin
+
+
+app.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
         if (err) {
-            console.error('Error updating mitzvah:', err.message);
-            return res.status(500).send('Error updating mitzvah');
+            return console.log(err);
         }
-        res.json({ rowsAffected: this.changes });
+        res.redirect('/login.html'); // Redirect to login page after logout
     });
 });
 
-app.post('/api/sponsor_info', (req, res) => {
-    const { mitzvah_id, sponsor_name, sponsored_for } = req.body;
-    const sql = "INSERT INTO sponsor_info (mitzvah_id, sponsor_name, sponsored_for) VALUES (?, ?, ?)";
-    db.run(sql, [mitzvah_id, sponsor_name, sponsored_for], function(err) {
-        if (err) {
-            console.error('Error adding sponsor info:', err.message);
-            return res.status(500).send('Error adding sponsor info');
-        }
-        res.json({ id: this.lastID });
-    });
-});
 
-app.get('/api/sponsor_info/:mitzvah_id', (req, res) => {
-    const { mitzvah_id } = req.params;
-    const sql = "SELECT * FROM sponsor_info WHERE mitzvah_id = ?";
-    db.all(sql, [mitzvah_id], (err, rows) => {
-        if (err) {
-            console.error('Error querying sponsor info:', err.message);
-            return res.status(500).send('Error querying sponsor info');
-        }
-        res.json(rows);
-    });
-});
-
-app.get('/api/admin', (_req, res) => {
-    const sql = `
-        SELECT mitzvos.id, mitzvos.name, mitzvos.description, mitzvos.sponsored, sponsor_info.sponsor_name, sponsor_info.sponsored_for
-        FROM mitzvos
-        LEFT JOIN sponsor_info ON mitzvos.id = sponsor_info.mitzvah_id
-    `;
-    db.all(sql, [], (err, rows) => {
-        if (err) {
-            console.error('Error querying admin data:', err.message);
-            return res.status(500).send('Error querying admin data');
-        }
-        res.json(rows);
-    });
-});
-
-// Simplified /sponsor route for demonstration, ensure alignment with actual data structure and requirements
-app.post('/api/sponsor', (req, res) => {
-    // Server-side validation of request body is highly recommended here
-    const { sponsorshipName, name, email, sponsoredFor } = req.body;
-    // Insert logic here to handle the sponsorship (e.g., database insertion, payment processing)
-
-    // Example response
-    res.json({ success: true, message: "Sponsorship processed" });
-});
-
-app.get('*', (req, res) => {
-    // Send the main entry point of your frontend app for any non-API requests
-    res.sendFile(path.join(__dirname, '..', '..', 'frontend', 'html', 'index.html'));
-});
-
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

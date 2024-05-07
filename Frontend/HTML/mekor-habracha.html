@@ -15,9 +15,15 @@
             <li><a href="contact.html">Contact Us</a></li>
         </ul>
     </nav>
-    <main class="container">
-        <h1>Available Sponsorships</h1>
-        <section id="sponsorships-list">
+    <main class="main-container">
+        <section class="section-container">
+            <h1 id="about"></h1>
+            <p>
+                insert about info here - about the rebbe, mekor habracha, goals of sefer, individual mitzvah explanations? etc.
+            </p>
+        </section>
+        <section class="section-container" id="sponsorships-list">
+            <h1>Available Sponsorships</h1>
             <div class="sponsorship-option">
                 <h2>Mitzvah Sponsorships</h2>
                 <p>Select a mitzvah to sponsor from the list below.</p>
@@ -25,29 +31,30 @@
                     <!-- Dynamically generated mitzvah sponsorships will be inserted here -->
                 </div>
             </div>
-            <!-- Additional sponsorship options if necessary -->
         </section>
+        <section class="section-container">
         <div class="sponsorship-option">
             <h2>Book Cover Sponsorship</h2>
             <p>Sponsor the cover of the book for $18,000.</p>
             <p>Includes 3 full pages of dedications inside the book.</p>
             <button class="sponsor-button" onclick="openForm('Book Cover Sponsorship')">Sponsor Now</button>
         </div>
-
+        </section>
+        <section class="section-container">
         <div class="sponsorship-option">
             <h2>Dedications Page Sponsorship</h2>
             <p>Any donations of 180$ and up are in the dedications page.</p>
             <button class="sponsor-button" onclick="openForm('Dedications Page Sponsorship')">Sponsor Now</button>
         </div>
-
+        </section>
+        <section class="section-container">
         <div class="sponsorship-option">
             <h2>General Donations</h2>
             <p>Make a general donation to support our cause.</p>
             <button class="sponsor-button" onclick="openForm('General Donations')">Donate Now</button>
         </div>
+        </section>
     </main>
-
-    <!-- The modal -->
     <div id="sponsor-modal" class="modal">
         <!-- Modal content -->
         <div class="modal-content">

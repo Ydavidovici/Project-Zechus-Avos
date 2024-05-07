@@ -1,24 +1,37 @@
-CREATE TABLE IF NOT EXISTS siach_eliezer (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    type TEXT NOT NULL,  -- e.g., 'parsha', 'cover', 'dedication'
-    name TEXT NOT NULL,  -- e.g., name of the parsha, 'Book Cover', 'Dedications Page'
-    sponsored BOOLEAN NOT NULL DEFAULT 0,
-    sponsor_name TEXT,  -- Nullable: filled if sponsored
-    dedication TEXT     -- Nullable: additional dedication text if applicable
+-- Drops existing tables if they exist to allow re-running this script cleanly
+DROP TABLE IF EXISTS Sponsorships;
+DROP TABLE IF EXISTS Seforim;
+DROP TABLE IF EXISTS Admins;
+
+-- Create table for storing Seforim
+CREATE TABLE Seforim (
+SeferID INTEGER PRIMARY KEY,
+SeferName TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS mekor_habracha (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    type TEXT NOT NULL,  -- 'mitzvah', 'cover', 'dedication'
-    name TEXT NOT NULL,  -- Hebrew names of the mitzvahs
-    parshah TEXT,  -- The parshah associated with each mitzvah
-    description TEXT NOT NULL DEFAULT '',
-    sponsored BOOLEAN NOT NULL DEFAULT 0,
-    sponsor_name TEXT,
-    dedication TEXT
+-- Create table for storing Sponsorships
+CREATE TABLE Sponsorships (
+SponsorshipID INTEGER PRIMARY KEY,
+SeferID INTEGER NOT NULL,
+Type TEXT CHECK(Type IN ('Mitzvah', 'Parshah')) NOT NULL,
+TypeDetail TEXT NOT NULL,
+IsSponsored BOOLEAN NOT NULL,
+SponsorName TEXT,
+ForWhom TEXT,
+PaymentStatus TEXT CHECK(PaymentStatus IN ('Paid', 'Pledged')) NOT NULL,
+FOREIGN KEY(SeferID) REFERENCES Seforim(SeferID)
 );
 
--- Begin transaction for data insertion
+CREATE TABLE Admins (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+username TEXT UNIQUE NOT NULL,
+password TEXT NOT NULL
+);
+
+
+
+
+/*
 BEGIN TRANSACTION;
 
 INSERT INTO mekor_habracha (id, type, name, parshah, description) VALUES
@@ -106,3 +119,4 @@ INSERT INTO siach_eliezer (type, name) VALUES
 ('dedication', 'Dedications Page');
 
 COMMIT;
+*/
