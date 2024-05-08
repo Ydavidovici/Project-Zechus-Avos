@@ -36,7 +36,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'html', 'index.html'));
+    res.sendFile(path.join(__dirname, 'Frontend', 'html', 'index.html'));
 });
 
 // Seforim CRUD operations
@@ -218,7 +218,7 @@ app.get('/admin', (req, res) => {
 
 app.get('/success', (req, res) => {
     // Additional server-side logic could be performed here if necessary
-    res.sendFile(path.join(__dirname, 'public', 'html', 'success.html'));
+    res.sendFile(path.join(__dirname, 'Frontend', 'html', 'success.html'));
 });
 
 app.listen(PORT, () => {
