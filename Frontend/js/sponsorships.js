@@ -32,10 +32,9 @@ function displaySponsorships(sponsorships) {
 function sponsorSponsorship(sponsorshipId, amount) {
     const sponsorInfo = getSponsorInfo();
     if (!sponsorInfo) return;
-
     markSponsorshipAsPledged(sponsorshipId, sponsorInfo, () => {
         createPaymentLink({
-            description: `Sponsorship ID: ${sponsorshipId}`,
+            description: description,
             amount: amount,
             metadata: { ...sponsorInfo, sponsorshipId }
         });
@@ -83,4 +82,27 @@ function createPaymentLink(data) {
             if (data.url) window.location.href = data.url;
         })
         .catch(error => console.error('Error creating payment link:', error));
+}
+
+
+function sponsorCover() {
+    const sponsorName = document.getElementById('sponsorName').value;
+    const sponsorContact = document.getElementById('sponsorContact').value;
+
+    if (!sponsorName || !sponsorContact) {
+        alert("Please fill in all required fields.");
+        return;
+    }
+
+    const sponsorshipDetails = {
+        description: "Book Cover Sponsorship",
+        amount: 1800000, // Amount in cents ($18,000)
+        metadata: {
+            sponsorName,
+            sponsorContact,
+            sponsorshipType: 'Book Cover'
+        }
+    };
+
+    createPaymentLink(sponsorshipDetails);
 }

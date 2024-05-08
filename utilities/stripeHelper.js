@@ -11,23 +11,21 @@ async function createPaymentLink(description, amount, metadata) {
                         name: description,
                         metadata: metadata
                     },
-                    unit_amount: amount * 100,  // Ensure amount is in cents
+                    unit_amount: amount * 100, // amount is expected to be in cents
                 },
-                quantity: 1,
+                quantity: 1
             }],
-            payment_intent_data: {
-                metadata: metadata
-            },
             after_completion: {
                 type: 'redirect',
-                redirect: { url: "https://projectzechusavos.org/success" }
+                redirect: { url: "https://projectzechusavos/success" }
             }
         });
-        return paymentLink.url;
+        return paymentLink;
     } catch (error) {
         console.error('Error creating payment link:', error);
-        throw error;  // Ensure errors are thrown to be handled by the caller
+        throw error;
     }
 }
+
 
 module.exports = { createPaymentLink };

@@ -21,15 +21,16 @@
 <main class="main-container">
     <section id="bookCoverSponsorship" class="section-container">
         <h2>Book Cover Sponsorship</h2>
-        <img src="../images/mekor-habracha-cover.jpg" alt="Mekor Habracha Cover">
         <p>Sponsor the book cover for $18,000, which includes three pages of dedications.</p>
+        <input type="text" id="sponsorName" placeholder="Your Name">
+        <input type="email" id="sponsorContact" placeholder="Your Email">
         <button onclick="sponsorCover()">Sponsor Cover</button>
     </section>
 
     <section id="dedications" class="section-container">
         <h2>Dedications Page</h2>
         <p>Contribute $180 or more to be featured on the dedications page.</p>
-        <button onclick="contributeToDedications()">Contribute</button>
+        <button onclick="sponsorSponsorship()">Contribute</button>
     </section>
 
     <section id="availableSponsorships" class="section-container">
@@ -40,7 +41,7 @@
     <section id="generalDonations" class="section-container">
         <h2>General Donations</h2>
         <p>Support our cause with any amount you feel comfortable with.</p>
-        <button onclick="makeGeneralDonation()">Donate</button>
+        <a href="your-stripe-donation-link" target="_blank"><button>Donate</button></a>
     </section>
 </main>
 <footer>

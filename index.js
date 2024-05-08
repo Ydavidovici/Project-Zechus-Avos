@@ -171,8 +171,8 @@ app.get('/logout', (req, res) => {
 app.post('/api/create-payment-link', async (req, res) => {
     const { description, amount, metadata } = req.body;
     try {
-        const url = await stripeHelper.createPaymentLink(description, amount, metadata);
-        res.json({ url });
+        const paymentLink = await stripeHelper.createPaymentLink(description, amount, metadata);
+        res.json({ url: paymentLink.url });
     } catch (error) {
         res.status(500).json({ message: "Stripe payment link creation failed", error: error.message });
     }
