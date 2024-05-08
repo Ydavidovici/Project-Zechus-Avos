@@ -58,12 +58,15 @@ app.post('/api/seforim', (req, res) => {
     });
 });
 
-app.patch('/api/seforim/:id', (req, res) => {
-    db.run("UPDATE Seforim SET SeferName = ? WHERE SeferID = ?", [req.body.SeferName, req.params.id], function(err) {
-        if (err) res.status(400).json({ "error": err.message });
-        else res.json({ "message": "success", "data": this.changes });
-    });
+app.patch('/api/sponsorships/:id', (req, res) => {
+    const { IsSponsored, PaymentStatus, SponsorName, SponsorContact, ForWhom } = req.body;
+    db.run("UPDATE Sponsorships SET IsSponsored = ?, PaymentStatus = ?, SponsorName = ?, SponsorContact = ?, ForWhom = ? WHERE SponsorshipID = ?",
+        [IsSponsored ? 1 : 0, PaymentStatus, SponsorName, SponsorContact, ForWhom, req.params.id], function(err) {
+            if (err) res.status(400).json({ "error": err.message });
+            else res.json({ "message": "success", "data": this.changes });
+        });
 });
+
 
 app.delete('/api/seforim/:id', (req, res) => {
     db.run("DELETE FROM Seforim WHERE SeferID = ?", [req.params.id], function(err) {
@@ -186,24 +189,28 @@ app.post('/send-email', async (req, res) => {
     }
 });
 
-app.post('/webhook', express.raw({type: 'application/json'}), async (req, res) => {
-    const sig = req.headers['stripe-signature'];
-    let event;
+app.post('/webhook', express.raw({type: 'application/json'}), (req, res) => {
+    const event = webhookHelper.constructEvent(req.body, req.headers['stripe-signature'], process.env.STRIPE_WEBHOOK_SECRET);
 
-    try {
-        event = webhookHelper.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-    } catch (err) {
-        return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
+    if (event.type === 'payment_intent.succeeded') {
+        const paymentIntent = event.data.object;
+        // Assume metadata contains sponsorshipId
+        const sponsorshipId = paymentIntent.metadata.sponsorshipId;
 
-    // Handle the event
-    try {
-        webhookHelper.handleEvent(event);
-        res.json({received: true});
-    } catch (error) {
-        res.status(500).send('Failed to process webhook');
+        db.run("UPDATE Sponsorships SET PaymentStatus = 'Paid', PaymentIntentID = ? WHERE SponsorshipID = ?",
+            [paymentIntent.id, sponsorshipId], function(err) {
+                if (err) {
+                    console.error('Failed to update payment status:', err);
+                    res.status(500).send('Database update failed');
+                } else {
+                    res.status(200).send('Payment status updated successfully');
+                }
+            });
+    } else {
+        res.status(200).send('Webhook received unknown event type');
     }
 });
+
 
 
 app.get('/success', (req, res) => {
