@@ -144,10 +144,6 @@ app.delete('/api/sponsorships/:id', (req, res) => {
     });
 });
 
-app.get('/admin.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'html', 'admin.html'));
-});
-
 // Admin authentication routes
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
@@ -215,6 +211,9 @@ app.post('/webhook', express.raw({type: 'application/json'}), (req, res) => {
     }
 });
 
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Frontend', 'html', 'admin.html'));
+});
 
 
 app.get('/success', (req, res) => {
