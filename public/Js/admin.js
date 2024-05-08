@@ -18,17 +18,27 @@ function apiRequest(url, options = {}) {
         });
 }
 
-// DOMContentLoaded to ensure the DOM is fully loaded before scripts run
 document.addEventListener('DOMContentLoaded', function() {
     initAdminDashboard();
 });
 
 function initAdminDashboard() {
+    if (document.getElementById('addSeferFormButton')) {
+        document.getElementById('addSeferFormButton').addEventListener('click', showAddSeferForm);
+    } else {
+        console.error('Add Sefer Form Button not found');
+    }
+
+    if (document.getElementById('addSponsorshipFormButton')) {
+        document.getElementById('addSponsorshipFormButton').addEventListener('click', showAddSponsorshipForm);
+    } else {
+        console.error('Add Sponsorship Form Button not found');
+    }
+
     fetchSeforim();
     fetchSponsorships();
-    document.getElementById('addSeferFormButton').addEventListener('click', showAddSeferForm);
-    document.getElementById('addSponsorshipFormButton').addEventListener('click', showAddSponsorshipForm);
 }
+
 
 // Seforim Functions
 function fetchSeforim() {

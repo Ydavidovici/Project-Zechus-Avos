@@ -20,7 +20,7 @@
     <section class="section-container">
         <h2>Seforim</h2>
         <div id="seforimList"></div>
-        <button onclick="showAddSeferForm()">Add New Sefer</button>
+        <button id="addSeferFormButton" onclick="showAddSeferForm()">Add New Sefer</button>
         <div id="addSeferForm" class="hidden">
             <input type="text" id="newSeferName" placeholder="Sefer Name">
             <button onclick="addSefer()">Submit</button>
@@ -28,7 +28,7 @@
     </section>
     <section class="section-container">
         <h2>Sponsorships</h2>
-        <button onclick="showAddSponsorshipForm()">Add New Sponsorship</button>
+        <button id="addSponsorshipFormButton" onclick="showAddSponsorshipForm()">Add New Sponsorship</button>
         <div>
             <button onclick="fetchSponsorships('all')">All</button>
             <button onclick="fetchSponsorships('available')">Available</button>
@@ -49,6 +49,7 @@
         <a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a>
     </small>
 </footer>
+<div id="loadingIndicator" class="hidden">Loading...</div>
 <script src="../js/admin.js"></script>
 <script src="https://js.stripe.com/v3/"></script>
 </body>

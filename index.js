@@ -33,10 +33,11 @@ const webhookHelper = require('./utilities/webhookHelper');
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'Public', 'html', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'html', 'index.html'));
 });
 
 // Seforim CRUD operations
@@ -213,7 +214,7 @@ app.post('/webhook', express.raw({type: 'application/json'}), (req, res) => {
 
 app.get('/admin', (req, res) => {
     if (!req.session.user) {
-        return res.status(401).redirect('/login.html'); // Redirect to login if not authenticated
+        return res.status(401).redirect('html/login.html'); // Redirect to login if not authenticated
     }
     res.sendFile(path.join(__dirname, 'public', 'html', 'admin.html'));
 });
@@ -221,7 +222,7 @@ app.get('/admin', (req, res) => {
 
 app.get('/success', (req, res) => {
     // Additional server-side logic could be performed here if necessary
-    res.sendFile(path.join(__dirname, 'Public', 'html', 'success.html'));
+    res.sendFile(path.join(__dirname, 'public', 'html', 'success.html'));
 });
 
 app.listen(PORT, () => {
