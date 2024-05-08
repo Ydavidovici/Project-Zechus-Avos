@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .then(data => {
                     if (data.success) {
-                        window.location.href = '/admin.html';
+                        window.location.href = 'admin';
                     } else {
                         throw new Error('Invalid credentials'); // Generic error for security
                     }
