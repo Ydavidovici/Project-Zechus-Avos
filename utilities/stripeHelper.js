@@ -20,7 +20,7 @@ async function createPaymentLink(description, amount, metadata) {
             },
             after_completion: {
                 type: 'redirect',
-                redirect: { url: "https://yourwebsite.com/post-payment" }
+                redirect: { url: "https://projectzechusavos.org/success" }
             }
         });
         return paymentLink.url;

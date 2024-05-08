@@ -15,10 +15,13 @@ SponsorshipID INTEGER PRIMARY KEY,
 SeferID INTEGER NOT NULL,
 Type TEXT CHECK(Type IN ('Mitzvah', 'Parshah')) NOT NULL,
 TypeDetail TEXT NOT NULL,
-IsSponsored BOOLEAN NOT NULL,
+Amount INTEGER NOT NULL,
 SponsorName TEXT,
+SponsorContact TEXT,
+IsSponsored BOOLEAN NOT NULL,
 ForWhom TEXT,
 PaymentStatus TEXT CHECK(PaymentStatus IN ('Paid', 'Pledged')) NOT NULL,
+PaymentIntentID TEXT,
 FOREIGN KEY(SeferID) REFERENCES Seforim(SeferID)
 );
 

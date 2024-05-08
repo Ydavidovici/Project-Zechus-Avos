@@ -5,38 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../CSS/index.css">
     <title>Admin - Project Zechus Avos</title>
-    <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
-    <nav>
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="mekor-habracha.html">Mekor Habracha</a></li>
-            <li><a href="siach-eliezer.html">Siach Eliezer</a></li>
-            <li><a href="contact.html">Contact Us</a></li>
-        </ul>
-    </nav>
-    <main class="container">
-        <h1>Admin</h1>
-        <section id="admin">
-            <h2>Admin Panel</h2>
-            <p>Manage the Project Zechus Avos website here.</p>
-            <div id="admin-options">
-                <div id="mitzvos-list">
-                    <!-- Dynamically generated mitzvah sponsorships will be inserted here -->
-                </div>
-                <button id="add-mitzvah">Add Mitzvah</button>
-                <button id="edit-mitzvah">Edit Mitzvah</button>
-                <button id="delete-mitzvah">Delete Mitzvah</button>
-            </div>
-        </section>
-
-    </main>
-    <footer>
-        <small>
-            <a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a>
-        </small>
-    </footer>
-    <script src="../js/admin.js"></script>
+<nav>
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="mekor-habracha.html">Mekor Habracha</a></li>
+        <li><a href="siach-eliezer.html">Siach Eliezer</a></li>
+        <li><a href="contact.html">Contact Us</a></li>
+    </ul>
+</nav>
+<main class="main-container">
+    <section class="section-container">
+        <h2>Seforim</h2>
+        <div id="seforimList"></div>
+        <button onclick="showAddSeferForm()">Add New Sefer</button>
+        <div id="addSeferForm" class="hidden">
+            <input type="text" id="newSeferName" placeholder="Sefer Name">
+            <button onclick="addSefer()">Submit</button>
+        </div>
+    </section>
+    <section class="section-container">
+        <h2>Sponsorships</h2>
+        <button onclick="showAddSponsorshipForm()">Add New Sponsorship</button>
+        <div>
+            <button onclick="fetchSponsorships('all')">All</button>
+            <button onclick="fetchSponsorships('available')">Available</button>
+            <button onclick="fetchSponsorships('unavailable')">Unavailable</button>
+        </div>
+        <div id="addSponsorshipForm" class="hidden">
+            <input type="text" id="newSponsorshipSeferID" placeholder="Sefer ID">
+            <input type="text" id="newSponsorshipType" placeholder="Type (Mitzvah or Parshah)">
+            <input type="text" id="newSponsorshipDetail" placeholder="Detail">
+            <input type="number" id="newSponsorshipAmount" placeholder="Amount">
+            <button onclick="addSponsorship()">Submit New Sponsorship</button>
+        </div>
+        <div id="sponsorshipsList"></div>
+    </section>
+</main>
+<footer>
+    <small>
+        <a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a>
+    </small>
+</footer>
+<script src="../js/admin.js"></script>
+<script src="https://js.stripe.com/v3/"></script>
 </body>
 </html>

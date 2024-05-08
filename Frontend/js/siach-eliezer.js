@@ -1,32 +1,56 @@
-// // main script for handling interactions and database calls for the siach eliezer page
-
 document.addEventListener('DOMContentLoaded', function() {
-    fetchNonSponsoredParshahs();
+    fetchAvailableSponsorships();
 });
 
-function fetchNonSponsoredParshahs() {
-    fetch('/api/sponsorships?seferId=2&type=Parshah&isSponsored=false')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => displayParshahs(data.data))
-        .catch(error => console.error('Error fetching non-sponsored Parshahs:', error));
+function fetchAvailableSponsorships() {
+    fetch('/api/sponsorships?seferId=2&isSponsored=false')
+        .then(response => response.json())
+        .then(data => displaySponsorships(data.data))
+        .catch(error => console.error('Error fetching sponsorships:', error));
 }
 
-function displayParshahs(parshahs) {
-    const container = document.getElementById('parshahList');
-    container.innerHTML = ''; // Clear previous entries
+function displaySponsorships(sponsorships) {
+    const container = document.getElementById('sponsorship-list');
+    container.innerHTML = '';
+    sponsorships.forEach(sponsorship => {
+        const sponsorshipElement = document.createElement('div');
+        sponsorshipElement.innerHTML = `
+            <p>${sponsorship.TypeDetail} - $${sponsorship.Amount / 100}</p>
+            <button onclick="sponsorSponsorship(${sponsorship.SponsorshipID}, ${sponsorship.Amount})">Sponsor This Parshah</button>
+        `;
+        container.appendChild(sponsorshipElement);
+    });
+}
 
-    if (parshahs.length === 0) {
-        container.innerHTML = '<p>No non-sponsored Parshahs available.</p>';
-    } else {
-        parshahs.forEach(parshah => {
-            const parshahElement = document.createElement('li');
-            parshahElement.textContent = `${parshah.TypeDetail}`;
-            container.appendChild(parshahElement);
-        });
-    }
+function sponsorSponsorship(sponsorshipId, amount) {
+    const sponsorInfo = getSponsorInfo();
+    if (!sponsorInfo) return;
+
+    createPaymentLink({
+        description: `Sponsorship for Parshah ID: ${sponsorshipId}`,
+        amount: amount,
+        metadata: { ...sponsorInfo, sponsorshipId }
+    });
+}
+
+function getSponsorInfo() {
+    // Collect sponsor info from a form or input fields
+    return {
+        name: document.getElementById('sponsorName').value,
+        contact: document.getElementById('sponsorContact').value,
+        forWhom: document.getElementById('forWhom').value
+    };
+}
+
+function createPaymentLink(data) {
+    fetch('/api/create-payment-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.url) window.location.href = data.url;
+        })
+        .catch(error => console.error('Error creating payment link:', error));
 }

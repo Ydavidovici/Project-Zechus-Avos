@@ -328,4 +328,5 @@ bfg.jar
 .idea
 .idea/
 *.xml
-.xml
+.xml!/
+apple-developer-merchantid-domain-association

@@ -12,9 +12,10 @@ function configureMailer() {
     });
 }
 
-function sendEmail(transporter, to, subject, text) {
+async function sendEmail(to, subject, text) {
+    const transporter = configureMailer();
     const mailOptions = {
-        from: 'your-email@gmail.com',  // Use environment variables or configuration files
+        from: process.env.EMAIL_FROM,
         to: to,
         subject: subject,
         text: text
@@ -31,6 +32,7 @@ function sendEmail(transporter, to, subject, text) {
         });
     });
 }
+
 
 module.exports = {
     configureMailer,

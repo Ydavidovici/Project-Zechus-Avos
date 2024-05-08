@@ -1,98 +1,157 @@
+// Utility Functions for API Requests
+function apiRequest(url, options = {}) {
+    const defaultHeaders = {
+        'Content-Type': 'application/json',
+        ...options.headers
+    };
+    const settings = {
+        ...options,
+        headers: defaultHeaders
+    };
+
+    return fetch(url, settings)
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(error => Promise.reject(error));
+            }
+            return response.json();
+        });
+}
+
+// DOMContentLoaded to ensure the DOM is fully loaded before scripts run
 document.addEventListener('DOMContentLoaded', function() {
-    // Event listeners for form submissions and button clicks
-    document.getElementById('addSeferForm').addEventListener('submit', addSefer);
-    document.getElementById('addSponsorshipForm').addEventListener('submit', addSponsorship);
-    loadSeforim();
-    loadSponsorships();
+    initAdminDashboard();
 });
 
-function loadSeforim() {
-    fetch('/api/seforim')
-        .then(response => response.json())
+function initAdminDashboard() {
+    fetchSeforim();
+    fetchSponsorships();
+    document.getElementById('addSeferFormButton').addEventListener('click', showAddSeferForm);
+    document.getElementById('addSponsorshipFormButton').addEventListener('click', showAddSponsorshipForm);
+}
+
+// Seforim Functions
+function fetchSeforim() {
+    apiRequest('/api/seforim')
         .then(data => displaySeforim(data.data))
-        .catch(error => console.error('Error loading Seforim:', error));
+        .catch(error => displayError(error, 'seforimList'));
 }
 
 function displaySeforim(seforim) {
-    const container = document.getElementById('seforimList');
-    container.innerHTML = ''; // Clear previous entries
+    const list = document.getElementById('seforimList');
+    list.innerHTML = ''; // Clear existing entries
     seforim.forEach(sefer => {
-        container.innerHTML += `<li>${sefer.SeferName} - <button onclick="deleteSefer(${sefer.SeferID})">Delete</button></li>`;
+        const item = document.createElement('div');
+        item.innerHTML = `
+            <p>${sefer.SeferName} <button onclick="deleteSefer(${sefer.SeferID})">Delete</button></p>
+        `;
+        list.appendChild(item);
     });
 }
 
-function addSefer(event) {
-    event.preventDefault();
-    const seferName = document.getElementById('seferName').value;
-    fetch('/api/seforim', {
+function showAddSeferForm() {
+    document.getElementById('addSeferForm').style.display = 'block';
+}
+
+function addSefer() {
+    const seferName = document.getElementById('newSeferName').value;
+    apiRequest('/api/seforim', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ SeferName: seferName })
     })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Sefer added:', data);
-            loadSeforim(); // Reload the list
+        .then(() => {
+            fetchSeforim();  // Refresh the list
+            document.getElementById('addSeferForm').style.display = 'none';
         })
-        .catch(error => console.error('Error adding Sefer:', error));
+        .catch(error => displayError(error, 'seforimList'));
 }
 
 function deleteSefer(seferId) {
-    fetch(`/api/seforim/${seferId}`, {
-        method: 'DELETE'
-    })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Sefer deleted:', data);
-            loadSeforim(); // Reload the list
-        })
-        .catch(error => console.error('Error deleting Sefer:', error));
+    apiRequest(`/api/seforim/${seferId}`, { method: 'DELETE' })
+        .then(() => fetchSeforim())  // Refresh the list
+        .catch(error => displayError(error, 'seforimList'));
 }
 
-function loadSponsorships() {
-    fetch('/api/sponsorships')
-        .then(response => response.json())
-        .then(data => displaySponsorships(data.data))
-        .catch(error => console.error('Error loading Sponsorships:', error));
+async function fetchSponsorships(filter = 'all') {
+    let url = '/api/sponsorships';
+    if (filter === 'available') {
+        url += '?isSponsored=false';
+    } else if (filter === 'unavailable') {
+        url += '?isSponsored=true';
+    }
+
+    try {
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        loadingIndicator.style.display = 'block'; // Show loading indicator
+
+        const data = await apiRequest(url);
+        displaySponsorships(data.data);
+
+        loadingIndicator.style.display = 'none'; // Hide loading indicator
+    } catch (error) {
+        displayError(error, 'sponsorshipsList');
+        loadingIndicator.style.display = 'none';
+    }
 }
 
 function displaySponsorships(sponsorships) {
-    const container = document.getElementById('sponsorshipsList');
-    container.innerHTML = ''; // Clear previous entries
+    const list = document.getElementById('sponsorshipsList');
+    list.innerHTML = '';  // Clear previous entries
     sponsorships.forEach(sponsorship => {
-        container.innerHTML += `<li>${sponsorship.TypeDetail} - Sponsored: ${sponsorship.IsSponsored ? 'Yes' : 'No'} - <button onclick="deleteSponsorship(${sponsorship.SponsorshipID})">Delete</button></li>`;
+        const item = document.createElement('div');
+        item.innerHTML = `
+            <p>ID: ${sponsorship.SponsorshipID}</p>
+            <p>Sefer ID: ${sponsorship.SeferID}</p>
+            <p>Type: ${sponsorship.Type}</p>
+            <p>Detail: ${sponsorship.TypeDetail}</p>
+            <p>Amount: $${sponsorship.Amount / 100}</p>
+            <p>Status: ${sponsorship.IsSponsored ? `Sponsored by ${sponsorship.SponsorName} for ${sponsorship.ForWhom}` : 'Available'}</p>
+            <button onclick="updateSponsorshipStatus(${sponsorship.SponsorshipID}, true)">Mark as Sponsored</button>
+            <button onclick="deleteSponsorship(${sponsorship.SponsorshipID})">Delete</button>
+        `;
+        list.appendChild(item);
     });
 }
 
-function addSponsorship(event) {
-    event.preventDefault();
-    const formData = new FormData(document.getElementById('addSponsorshipForm'));
-    const data = Object.fromEntries(formData.entries());
-    fetch('/api/sponsorships', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-    })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Sponsorship added:', data);
-            loadSponsorships(); // Reload the list
-        })
-        .catch(error => console.error('Error adding Sponsorship:', error));
+
+
+function showAddSponsorshipForm() {
+    document.getElementById('addSponsorshipForm').style.display = 'block';
 }
 
-function deleteSponsorship(sponsorshipId) {
-    fetch(`/api/sponsorships/${sponsorshipId}`, {
-        method: 'DELETE'
+function addSponsorship() {
+    const seferID = document.getElementById('newSponsorshipSeferID').value;
+    const type = document.getElementById('newSponsorshipType').value;
+    const detail = document.getElementById('newSponsorshipDetail').value;
+    const amount = document.getElementById('newSponsorshipAmount').value;
+    apiRequest('/api/sponsorships', {
+        method: 'POST',
+        body: JSON.stringify({ SeferID: seferID, Type: type, TypeDetail: detail, IsSponsored: false, PaymentStatus: 'Unpaid', Amount: amount })
     })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Sponsorship deleted:', data);
-            loadSponsorships(); // Reload the list
+        .then(() => {
+            fetchSponsorships();  // Refresh the list
+            document.getElementById('addSponsorshipForm').style.display = 'none';
         })
-        .catch(error => console.error('Error deleting Sponsorship:', error));
+        .catch(error => displayError(error, 'sponsorshipsList'));
+}
+
+function updateSponsorshipStatus(id, isSponsored) {
+    apiRequest(`/api/sponsorships/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ IsSponsored: isSponsored })
+    })
+        .then(() => fetchSponsorships())  // Refresh the list
+        .catch(error => displayError(error, 'sponsorshipsList'));
+}
+
+function deleteSponsorship(id) {
+    apiRequest(`/api/sponsorships/${id}`, { method: 'DELETE' })
+        .then(() => fetchSponsorships())  // Refresh the list
+        .catch(error => displayError(error, 'sponsorshipsList'));
+}
+
+// Error Handling Utility
+function displayError(error, elementId) {
+    const container = document.getElementById(elementId);
+    container.innerHTML = `<p>Error: ${error.message || 'An unknown error occurred'}</p>`;
 }

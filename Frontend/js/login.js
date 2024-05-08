@@ -1,36 +1,36 @@
 // login.js
 document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
+    const loginError = document.getElementById('loginError'); // Assume there's an error display element in your HTML
+
     if (loginForm) {
         loginForm.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent the form from submitting via the browser
-
+            event.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
             fetch('/login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
             })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Failed to login');
+                        return response.json().then(error => Promise.reject(error));
                     }
                     return response.json();
                 })
                 .then(data => {
                     if (data.success) {
-                        window.location.href = '/admin.html'; // Redirect to the admin page
+                        window.location.href = '/admin.html';
                     } else {
-                        alert('Login failed: ' + (data.error || 'Invalid credentials'));
+                        throw new Error('Invalid credentials'); // Generic error for security
                     }
                 })
                 .catch(error => {
                     console.error('Login Error:', error);
-                    alert('Login failed: ' + error.message);
+                    loginError.textContent = 'Login failed: ' + error.message; // Display error without alert
+                    document.getElementById('password').value = ''; // Clear password field
                 });
         });
     }

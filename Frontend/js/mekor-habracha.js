@@ -1,32 +1,78 @@
-// main script for handling interactions and database calls for the mekor habracha page
-
 document.addEventListener('DOMContentLoaded', function() {
-    fetchNonSponsoredMitzvahs();
+    fetchAvailableSponsorships();
 });
 
-function fetchNonSponsoredMitzvahs() {
-    fetch('/api/sponsorships?seferId=1&type=Mitzvah&isSponsored=false')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => displayMitzvahs(data.data))
-        .catch(error => console.error('Error fetching non-sponsored Mitzvahs:', error));
+function fetchAvailableSponsorships() {
+    fetch('/api/sponsorships?seferId=1&isSponsored=false')
+        .then(response => response.json())
+        .then(data => displaySponsorships(data.data))
+        .catch(error => console.error('Error fetching sponsorships:', error));
 }
 
-function displayMitzvahs(mitzvahs) {
-    const container = document.getElementById('mitzvahList');
-    container.innerHTML = ''; // Clear previous entries
+function displaySponsorships(sponsorships) {
+    const container = document.getElementById('sponsorshipsList');
+    container.innerHTML = '';
+    sponsorships.forEach(sponsorship => {
+        const sponsorshipElement = document.createElement('div');
+        sponsorshipElement.innerHTML = `
+            <p>${sponsorship.TypeDetail} - $${sponsorship.Amount / 100}</p>
+            <button onclick="sponsorSponsorship(${sponsorship.SponsorshipID}, ${sponsorship.Amount})">Sponsor This</button>
+        `;
+        container.appendChild(sponsorshipElement);
+    });
+}
 
-    if (mitzvahs.length === 0) {
-        container.innerHTML = '<p>No non-sponsored Mitzvahs available.</p>';
-    } else {
-        mitzvahs.forEach(mitzvah => {
-            const mitzvahElement = document.createElement('li');
-            mitzvahElement.textContent = `${mitzvah.TypeDetail}`;
-            container.appendChild(mitzvahElement);
+function sponsorSponsorship(sponsorshipId, amount) {
+    const sponsorInfo = getSponsorInfo();
+    if (!sponsorInfo) return;
+
+    createPaymentLink({
+        description: `Sponsorship ID: ${sponsorshipId}`,
+        amount: amount,
+        metadata: { ...sponsorInfo, sponsorshipId }
+    });
+}
+
+function getSponsorInfo() {
+    // Example fields, ensure you have these fields in your HTML or gather this info another way
+    return {
+        name: document.getElementById('sponsorName').value,
+        contact: document.getElementById('sponsorContact').value,
+        forWhom: document.getElementById('forWhom').value
+    };
+}
+
+function createPaymentLink(data) {
+    fetch('/api/create-payment-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.url) window.location.href = data.url;
+        })
+        .catch(error => console.error('Error creating payment link:', error));
+}
+
+
+function sendEmail(to, subject, message) {
+    fetch('/send-email', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ to, subject, message })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Email sent successfully');
+            } else {
+                console.error('Failed to send email');
+            }
+        })
+        .catch(error => {
+            console.error('Error sending email:', error);
         });
-    }
 }

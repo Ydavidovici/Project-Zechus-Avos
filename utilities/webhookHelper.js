@@ -14,10 +14,13 @@ function handleEvent(event) {
     switch (event.type) {
         case 'checkout.session.completed':
             console.log('Checkout session completed');
+            // Implement sending email or other notifications
+            sendEmail('customer@example.com', 'Payment Successful', 'Your payment was successfully processed!');
             break;
         default:
             console.log(`Unhandled event type ${event.type}`);
     }
 }
+
 
 module.exports = { constructEvent, handleEvent };
