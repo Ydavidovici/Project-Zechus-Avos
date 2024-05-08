@@ -212,7 +212,10 @@ app.post('/webhook', express.raw({type: 'application/json'}), (req, res) => {
 });
 
 app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'Public', 'html', 'admin.html'));
+    if (!req.session.user) {
+        return res.status(401).redirect('/login.html'); // Redirect to login if not authenticated
+    }
+    res.sendFile(path.join(__dirname, 'public', 'html', 'admin.html'));
 });
 
 
