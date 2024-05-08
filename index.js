@@ -20,7 +20,7 @@ app.use(session({
 }));
 
 
-const db = new sqlite3.Database('./backend/db/pza.db', err => {
+const db = new sqlite3.Database('./db/pza.db', err => {
     if (err) console.error('Error opening database ' + err.message);
     else console.log('Database connected!');
 });
@@ -36,7 +36,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'Frontend', 'html', 'index.html'));
+    res.sendFile(path.join(__dirname, 'Public', 'html', 'index.html'));
 });
 
 // Seforim CRUD operations
@@ -212,13 +212,13 @@ app.post('/webhook', express.raw({type: 'application/json'}), (req, res) => {
 });
 
 app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'Frontend', 'html', 'admin.html'));
+    res.sendFile(path.join(__dirname, 'Public', 'html', 'admin.html'));
 });
 
 
 app.get('/success', (req, res) => {
     // Additional server-side logic could be performed here if necessary
-    res.sendFile(path.join(__dirname, 'Frontend', 'html', 'success.html'));
+    res.sendFile(path.join(__dirname, 'Public', 'html', 'success.html'));
 });
 
 app.listen(PORT, () => {
