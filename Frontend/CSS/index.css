@@ -1,31 +1,30 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;700&display=swap');
 
 
 /* Global page styles */
 body, html {
   margin: 0;
   padding: 0;
-  font-family: 'Roboto', sans-serif; 
-  font-weight: 500;
-  font-size: 18px; 
-  background-color: #f5f5f5; /* Light gray for the page background, correcting the earlier #282727 */
-  color: #282727; /* Assuming you want the text color to be this dark gray */
+  font-family: 'Open Sans', sans-serif; /* Updated to use Open Sans */
+  font-weight: 300; /* Use the lighter 300 weight for a thinner look */
+  font-size: 16px; /* Keep standard readable size */
+  background-color: #121212; /* Maintain dark background for the entire page */
+  color: #e0e0e0; /* Light gray text color for contrast */
   line-height: 1.6;
 }
 
-/* Updating the navigation bar with added lateral margins */
+
+/* Navigation bar styling */
 nav {
-  box-sizing: border-box;
-  background-color: #dcdcdc; /* Light gray for the nav background */
-  padding: 20px; /* Padding of 20px on all sides */
-  border-radius: 8px; /* Maintaining rounded corners */
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow for depth */
-  margin: 20px; /* Adds 20px margin on all sides */
+  background-color: #2c2c2c; /* Dark shade remains for the navbar */
+  padding: 20px 20px; /* Increased padding for a thicker navbar */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* Enhanced shadow for depth */
+  margin: 20px auto; /* Centered navbar with auto margins */
   display: flex;
   justify-content: center;
-  width: calc(100% - 40px); 
+  max-width: 80%; /* Narrower width */
 }
-
 
 nav ul {
   list-style-type: none;
@@ -37,197 +36,193 @@ nav ul {
 }
 
 nav ul li {
-  margin: 0 15px;
+  margin: 0 20px; /* Increased spacing between links */
 }
 
 nav ul li a {
   text-decoration: none;
-  color: #a9a9a9; /* Ensuring contrast against the light gray nav background */
+  color: #e0e0e0; /* Light gray color for links */
   font-weight: bold;
+  transition: color 0.3s;
 }
 
-/* Container styling */
-.container {
+nav ul li a:hover {
+  color: #9a68b2; /* Subtle purple for hover effect */
+}
+
+/* Adding a subtle color accent to the navbar */
+nav {
+  border-bottom: 3px solid #4a4e69; /* Dark blue shade */
+}
+
+
+/* Styling main content area */
+.main-container {
   max-width: 1200px;
   margin: 20px auto;
   padding: 40px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background-color: #1e1e1e; /* Slightly lighter dark shade for the container */
+  border-radius: 12px; /* Rounded corners for the container */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5); /* Stronger shadow for more depth */
 }
 
-/* Text and link adjustments for readability */
-h1, h2, h3, p, a {
-  margin-top: 20px;
-  margin-bottom: 20px;
+/* Section styling */
+.section-container {
+  margin-bottom: 40px; /* More space between sections */
+  padding: 20px;
+  border-radius: 8px; /* Rounded corners for each section */
+  background-color: #262626; /* Even lighter shade for sections to differentiate */
 }
 
-a:link, a:visited {
-  color: #403d3d; /* Adjust link colors */
-}
-
-a:hover, a:active {
-  color: #666;
-  text-decoration: underline;
-}
-
-/* Footer styling to match the navigation bar */
+/* Footer styling */
 footer {
-  background-color: #dcdcdc; /* Matching the nav background */
-  color: #333;
+  background-color: #2c2c2c;
+  color: #ccc;
   text-align: center;
   padding: 20px;
   border-radius: 8px;
   margin: 20px auto;
   width: calc(100% - 40px);
-  box-sizing: border-box;
 }
 
+/* Responsive behavior */
 @media screen and (max-width: 768px) {
-  .container, nav, footer {
+  .main-container, nav, footer {
     padding: 20px;
-    width: auto; /* Allow the container, nav, and footer to adapt to screen size */
+    width: auto;
     margin: 20px;
     box-sizing: border-box;
+    body, html {
+        font-weight: 400; /* Slightly thicker font on smaller screens for better readability */
+      }
+    }
   }
 
   nav, footer {
-    margin: 20px auto; /* Ensure consistent margin for smaller screens */
+    margin: 20px auto;
   }
 }
-/* Sponsorships-specific styles */
-.container {
-  max-width: 1200px;
-  margin: 20px auto;
+
+/* Success Page Styling */
+.success-container {
+  max-width: 800px;
+  margin: 50px auto;
   padding: 40px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-#mitzvos-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
-  padding: 20px 0;
-}
-
-.mitzvah-container {
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  padding: 20px;
+  background-color: #262626; /* Consistent dark theme */
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.6);
   text-align: center;
 }
 
-.mitzvah-container h2 {
-  margin-top: 0;
-  color: #0056b3;
+.success-message {
+  color: #d4d4d4;
+  font-size: 24px;
+  margin-bottom: 20px;
 }
 
-.mitzvah-container p {
-  font-size: 16px;
-  margin: 10px 0 20px;
+.success-details {
+  color: #e0e0e0;
+  margin-bottom: 30px;
 }
 
-.mitzvah-container .sponsor-button {
-  background-color: #007bff;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: background-color 0.3s, transform 0.2s;
-}
-
-.mitzvah-container .sponsor-button:hover, 
-.mitzvah-container .sponsor-button:focus {
-  background-color: #0056b3;
-  transform: translateY(-2px);
-}
-
-.mitzvah-modal {
-  position: fixed;
-  z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0,0,0,0.4);
-}
-
-.mitzvah-modal-content {
-  background-color: #fefefe;
-  margin: 15% auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 50%;
-  border-radius: 10px;
-}
-
-.close-modal {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.close-modal:hover, 
-.close-modal:focus {
-  color: black;
+.return-link {
+  color: #ffffff;
+  background-color: #388e3c; /* Green color for successful action */
+  padding: 10px 15px;
   text-decoration: none;
-  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.3s;
 }
 
-.sponsor-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.return-link:hover {
+  background-color: #66bb6a;
 }
 
-#sponsor-modal {
-  display: none;
+.form-container {
+  background-color: #1e1e1e; /* Slightly lighter than the page background */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+  max-width: 600px;
+  margin: 40px auto;
 }
 
-.mitzvah-container:hover {
-  transform: scale(1.03);
+input[type="text"], input[type="email"], select, textarea {
+  width: 100%; /* Full width */
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc; /* Subtle border */
+  border-radius: 4px; /* Rounded borders */
+  box-sizing: border-box; /* Helps with padding */
+  background-color: #262626; /* Dark background for inputs */
+  color: #e0e0e0; /* Light text color */
+  border: 1px solid #555; /* Slightly lighter border for visibility */
 }
 
-.sponsorship-option {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f9f9f9;
+input[type="text"]:focus, input[type="email"]:focus, select:focus, textarea:focus {
+  border-color: #9a68b2; /* Purple border for focus */
+  outline: none; /* Remove default focus outline */
 }
 
-.sponsorship-option h2 {
-  color: #333;
-  font-size: 1.5em;
-}
-
-.sponsorship-option p {
-  color: #666;
-  font-size: 1em;
-}
-
-.sponsor-button {
-  padding: 10px 20px;
-  color: #fff;
-  background-color: #333;
+input[type="submit"], button {
+  background-color: #4a4e69; /* Dark blue */
+  color: white;
+  padding: 14px 20px;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.sponsor-button:hover {
-  background-color: #666;
+input[type="submit"]:hover, button:hover {
+  background-color: #6c7a89; /* Lighter shade when hovered */
+}
+
+@media screen and (max-width: 600px) {
+  .form-container {
+    width: 90%;
+    margin: 20px auto;
+  }
+
+  input[type="text"], input[type="email"], select, textarea {
+    padding: 10px;
+  }
+
+  input[type="submit"], button {
+    width: 100%; /* Full width for easier access on smaller screens */
+    padding: 12px;
+  }
 }
 
 
+input[type="text"], input[type="password"] {
+  width: 90%; /* Same width for consistency */
+  padding: 12px;
+  margin: 10px auto; /* Auto margins for centering */
+  display: block;
+  background-color: #333;
+  border: 1px solid #555;
+  color: #fff;
+  font-size: 16px;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+button {
+  width: 90%; /* Set to match inputs */
+  padding: 14px 20px; /* Slightly thicker padding for a larger button feel */
+  margin: 8px auto; /* Adjusted margin to visually center with inputs */
+  background-color: #4a4e69;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: block;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #6c7a89;
+}
 

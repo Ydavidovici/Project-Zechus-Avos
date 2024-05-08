@@ -3,17 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../CSS/index.css">
     <title>Admin Login</title>
 </head>
-<body class="main-container">
+<body>
+<nav>
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="mekor-habracha.html">Mekor Habracha</a></li>
+        <li><a href="siach-eliezer.html">Siach Eliezer</a></li>
+        <li><a href="contact.html">Contact Us</a></li>
+    </ul>
+</nav>
+<main class="main-container">
 <section class="section-container">
     <h2>Admin Login</h2>
     <form id="loginForm">
-    <input type="text" id="username" name="username" placeholder="Username" required>
-    <input type="password" id="password" name="password" placeholder="Password" required>
-    <button type="submit">Login</button>
-</form>
+        <input type="text" id="username" name="username" placeholder="Username" required>
+        <input type="password" id="password" name="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
 </section>
 <script src="../Js/login.js"></script>
+</main>
 </body>
 </html>
