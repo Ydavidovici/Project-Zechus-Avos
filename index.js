@@ -9,10 +9,14 @@ const session = require('express-session');
 require('dotenv').config();
 
 app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: true, httpOnly: true, sameSite: 'strict' } // Enhance cookie security
+    secret: process.env.SESSION_SECRET,  // Secret key to sign the session ID cookie
+    resave: false,                      // Avoid resaving session if unmodified
+    saveUninitialized: false,           // Don't create session until something stored
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',  // Use secure cookies in production
+        httpOnly: true,                  // Prevent client-side JS from reading the cookie
+        maxAge: 24 * 60 * 60 * 1000      // Set cookie expiration time (e.g., 24 hours)
+    }
 }));
 
 
