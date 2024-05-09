@@ -240,6 +240,10 @@ function updateSponsorshipStatus(sponsorshipId, status) {
 
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
+    if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required" });
+    }
+
     db.get("SELECT password FROM Admins WHERE username = ?", [username], (err, row) => {
         if (err) {
             console.error("Database error:", err);
@@ -248,14 +252,21 @@ app.post('/login', (req, res) => {
         if (!row) {
             return res.status(401).json({ message: "Invalid credentials" });
         }
-        if (bcrypt.compareSync(password, row.password)) {
-            req.session.user = { username: username };
-            res.json({ success: true }); // Change here to handle fetch appropriately
-        } else {
-            res.status(401).json({ message: "Invalid credentials" });
-        }
+        bcrypt.compare(password, row.password, (error, isMatch) => {
+            if (error) {
+                console.error("bcrypt error:", error);
+                return res.status(500).json({ message: "Error checking credentials" });
+            }
+            if (isMatch) {
+                req.session.user = { username: username };
+                res.json({ success: true, message: "Login successful!" });
+            } else {
+                res.status(401).json({ message: "Invalid credentials" });
+            }
+        });
     });
 });
+
 
 app.get('/logout', (req, res) => {
     req.session.destroy((err) => {
