@@ -330,3 +330,4 @@ bfg.jar
 *.xml
 .xml!/
 apple-developer-merchantid-domain-association
+!/apple-developer-merchantid-domain-association
