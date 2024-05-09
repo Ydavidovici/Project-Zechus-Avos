@@ -1,9 +1,19 @@
-// sponsorships.js - Updated script for handling sponsorships using Stripe Checkout
+// sponsorships.js - Handles sponsorships and checkout using Stripe Checkout
 
-document.addEventListener('DOMContentLoaded', function() {
+let stripeInstance = null; // Store Stripe instance globally
+
+document.addEventListener('DOMContentLoaded', async function() {
+    const stripeConfig = await fetchStripeConfig();
+    stripeInstance = Stripe(stripeConfig.publicKey); // Initialize Stripe with fetched public key
     const seferId = document.body.dataset.seferId; // Use a data attribute on the <body> tag for seferId
-    fetchAvailableSponsorships(seferId);
+    fetchAvailableSponsorships(seferId); // Load sponsorships based on the seferId
 });
+
+async function fetchStripeConfig() {
+    const response = await fetch('/config/stripe'); // Endpoint to fetch public Stripe key
+    const config = await response.json();
+    return config; // Return the entire config object
+}
 
 function fetchAvailableSponsorships(seferId) {
     fetch(`/api/sponsorships?seferId=${seferId}&isSponsored=false`)
@@ -14,11 +24,7 @@ function fetchAvailableSponsorships(seferId) {
 
 function displaySponsorships(sponsorships) {
     const container = document.getElementById('sponsorshipsList');
-    if (sponsorships.length === 0) {
-        container.innerHTML = '<p>No available sponsorships at this time.</p>';
-        return;
-    }
-    container.innerHTML = '';
+    container.innerHTML = sponsorships.length === 0 ? '<p>No available sponsorships at this time.</p>' : '';
     sponsorships.forEach(sponsorship => {
         const sponsorshipElement = document.createElement('div');
         sponsorshipElement.innerHTML = `
@@ -31,21 +37,28 @@ function displaySponsorships(sponsorships) {
 
 function sponsorSponsorship(sponsorshipId, amount) {
     const sponsorInfo = getSponsorInfo();
-    if (!sponsorInfo) return;
+    if (!sponsorInfo) return; // Stop if sponsor info is invalid
     markSponsorshipAsPledged(sponsorshipId, sponsorInfo, () => {
-        initiateCheckout({
-            items: [{
-                name: "Sponsorship",
+        initiateCheckout([
+            {
+                description: "Sponsorship for " + sponsorInfo.forWhom,
                 amount: amount,
-                quantity: 1
-            }],
-            successUrl: 'https://yourdomain.com/success', // Make sure these URLs are set correctly
-            cancelUrl: 'https://yourdomain.com/cancel'
-        });
+                quantity: 1,
+                metadata: {
+                    sponsorshipId: sponsorshipId,
+                    sponsorName: sponsorInfo.name,
+                    sponsorContact: sponsorInfo.contact
+                }
+            }
+        ]);
     });
 }
 
 function getSponsorInfo() {
+    if (!document.getElementById('sponsorName').value || !document.getElementById('sponsorContact').value) {
+        alert('Please fill in all required fields.');
+        return null;
+    }
     return {
         name: document.getElementById('sponsorName').value,
         contact: document.getElementById('sponsorContact').value,
@@ -75,24 +88,28 @@ function markSponsorshipAsPledged(sponsorshipId, sponsorInfo, callback) {
         .catch(error => console.error('Error updating sponsorship status:', error));
 }
 
-function initiateCheckout(sessionData) {
+function initiateCheckout(items) {
+    const successUrl = 'https://projectzechusavos.org/success';
+    const cancelUrl = 'https://projectzechusavos.org/cancel';
+
     fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(sessionData)
+        body: JSON.stringify({ items, successUrl, cancelUrl })
     })
         .then(response => response.json())
         .then(data => {
             if (data.sessionId) {
                 redirectToStripe(data.sessionId);
+            } else {
+                alert('Error initiating checkout session.');
             }
         })
         .catch(error => console.error('Error initiating checkout:', error));
 }
 
 function redirectToStripe(sessionId) {
-    const stripe = Stripe('pk_test_your_public_key_here'); // Replace with your public Stripe key
-    stripe.redirectToCheckout({
+    stripeInstance.redirectToCheckout({
         sessionId: sessionId
     }).then((result) => {
         if (result.error) {

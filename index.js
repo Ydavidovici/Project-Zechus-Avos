@@ -181,7 +181,9 @@ app.post('/api/create-checkout-session', async (req, res) => {
     }
 });
 
-
+app.get('/config/stripe', (req, res) => {
+    res.json({ publicKey: process.env.STRIPE_PUBLIC_KEY });
+});
 
 app.post('/api/stripe-webhook', express.raw({type: 'application/json'}), (req, res) => {
     const sigHeader = req.headers['stripe-signature'];
@@ -215,7 +217,6 @@ app.post('/api/stripe-webhook', express.raw({type: 'application/json'}), (req, r
     res.json({ received: true }); // Acknowledge receipt of the webhook
 });
 
-
 function handleCheckoutSessionCompleted(session) {
     const sponsorshipId = session.metadata && session.metadata.sponsorshipId;
     if (!sponsorshipId) {
@@ -237,7 +238,6 @@ function updateSponsorshipStatus(sponsorshipId, status) {
     });
 }
 
-
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
     db.get("SELECT password FROM Admins WHERE username = ?", [username], (err, row) => {
@@ -257,8 +257,6 @@ app.post('/login', (req, res) => {
     });
 });
 
-
-// Logout route
 app.get('/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
@@ -278,7 +276,6 @@ app.get('/admin', (req, res) => {
 app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'html', 'login.html'));
 });
-
 
 app.get('/success', (req, res) => {
     // Additional server-side logic could be performed here if necessary
