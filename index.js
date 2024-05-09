@@ -130,12 +130,7 @@ app.get('/api/sponsorships/:id', (req, res) => {
     });
 });
 
-app.post('/api/sponsorships', (req, res) => {
-    console.log('Received POST request:', req.body);
-    res.json({ message: "POST received", data: req.body });
-});
 
-/*
 app.post('/api/sponsorships', (req, res) => {
     console.log('Received data for sponsorship:', req.body);
     const { SeferID, Type, TypeDetail, Amount, IsSponsored, SponsorName, SponsorContact, ForWhom, PaymentStatus, PaymentIntentID } = req.body;
@@ -152,8 +147,6 @@ app.post('/api/sponsorships', (req, res) => {
         });
     console.log('Database operation initiated.');
 });
-*/
-
 
 app.patch('/api/sponsorships/:id', (req, res) => {
     const { Type, TypeDetail, Amount, IsSponsored, SponsorName, SponsorContact, ForWhom, PaymentStatus, PaymentIntentID } = req.body;
@@ -296,6 +289,7 @@ app.get('/success', (req, res) => {
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'html', 'index.html'));
 });
+
 
 // Make sure this is below your route definitions
 app.use((req, res, next) => {
