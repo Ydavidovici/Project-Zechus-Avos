@@ -1,35 +1,14 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Any DOM-related initializations or homepage specific functionalities
-    //initPageFeatures();
-});
+document.addEventListener('DOMContentLoaded', () => {
+    const sponsorshipButton = document.getElementById('sponsorship-info-button');
+    const sponsorshipInfo = document.getElementById('sponsorship-info');
 
-
-/*
-function initPageFeatures() {
-    // Example functionality: animate elements, load dynamic content, etc.
-    console.log('Homepage initialized');
-
-    // Example: Setup a welcome message or animate the about information
-    setupWelcomeMessage();
-}
-
-
-
-function setupWelcomeMessage() {
-    const welcomeMessageElement = document.getElementById('welcomeMessage');
-    if (welcomeMessageElement) {
-        welcomeMessageElement.innerText = 'Welcome to our Website! Learn more about our services and community.';
-        // Animate the welcome message, if needed
-        animateElement(welcomeMessageElement);
+    // Assuming you have a button to show more info about sponsorships
+    if (sponsorshipButton && sponsorshipInfo) {
+        sponsorshipInfo.style.display = 'none'; // Initially hide the info
+        sponsorshipButton.addEventListener('click', () => {
+            const isHidden = sponsorshipInfo.style.display === 'none';
+            sponsorshipInfo.style.display = isHidden ? 'block' : 'none';
+            sponsorshipInfo.style.animation = isHidden ? 'slideInFromLeft 1s ease-out forwards' : 'none';
+        });
     }
-}
-
-function animateElement(element) {
-    // Placeholder for simple animation logic
-    element.classList.add('animated');
-    // Example: Using CSS to fade in the text
-    setTimeout(() => {
-        element.style.opacity = 1;
-    }, 300); // Adjust timing as necessary
-}
-*/
+});

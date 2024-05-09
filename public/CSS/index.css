@@ -226,3 +226,38 @@ button:hover {
   background-color: #6c7a89;
 }
 
+
+/* CSS transitions for interactive elements */
+a, button {
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+/* Hover effects for links and buttons */
+a:hover, button:hover {
+  color: #ffffff;
+  background-color: #9a68b2; /* Adjust as needed for your design */
+}
+
+/* Animation for sliding elements into view */
+@keyframes slideInFromLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.section-container {
+  animation: slideInFromLeft 1s ease-out forwards;
+  opacity: 0; /* Start elements out as invisible */
+}
+
+/* Responsive animations adjustments for smaller screens */
+@media (max-width: 768px) {
+  .section-container {
+    animation: none;
+  }
+}
