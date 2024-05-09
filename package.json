@@ -10,7 +10,7 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "jest",
-    "postinstall": "sqlite3 backend/db/mydatabase.db < backend/db/schema.sql"
+    "postinstall": "sqlite3 db/pza.db < db/schema.sql"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +19,7 @@
     "jest": "^29.7.0",
     "jest-fetch-mock": "^3.0.3",
     "jsdom": "^24.0.0",
+    "morgan": "^1.10.0",
     "nodemon": "^3.1.0",
     "supertest": "^6.3.4"
   },

@@ -8,6 +8,25 @@ const PORT = process.env.PORT || 3000;
 const session = require('express-session');
 require('dotenv').config();
 console.log("Stripe Key Loaded:", !!process.env.STRIPE_SECRET_KEY);  // Will log 'true' if the key is loaded
+const logger = require('morgan');
+app.use(logger('dev'));
+
+app.use(cors());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use((req, res, next) => {
+    console.log('Incoming Request:', req.method, req.path);
+    next();
+});
+
+app.use(express.json());
+
+app.use((req, res, next) => {
+    console.log('Parsed Body:', req.body);
+    next();
+});
+
 
 app.use(session({
     secret: process.env.SESSION_SECRET,  // Secret key to sign the session ID cookie
@@ -21,7 +40,9 @@ app.use(session({
 }));
 
 
-const db = new sqlite3.Database('./db/pza.db', err => {
+const dbPath = path.join(__dirname, 'db', 'pza.db');
+console.log("Database path:", dbPath);
+const db = new sqlite3.Database(dbPath, (err) => {
     if (err) console.error('Error opening database ' + err.message);
     else console.log('Database connected!');
 });
@@ -29,22 +50,6 @@ const db = new sqlite3.Database('./db/pza.db', err => {
 const { formatDate, formatCurrency } = require('./utilities/dataFormatter');
 const webhookHelper = require('./utilities/webhookHelper');
 const { createCheckoutSession } = require('./utilities/stripeHelper');
-
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use((req, res, next) => {
-    let data = '';
-    req.on('data', chunk => {
-        data += chunk;
-    });
-    req.on('end', () => {
-        console.log("Raw data received:", data);
-        next();
-    });
-});
 
 // Seforim CRUD operations
 app.get('/api/seforim', (req, res) => {
@@ -126,13 +131,29 @@ app.get('/api/sponsorships/:id', (req, res) => {
 });
 
 app.post('/api/sponsorships', (req, res) => {
+    console.log('Received POST request:', req.body);
+    res.json({ message: "POST received", data: req.body });
+});
+
+/*
+app.post('/api/sponsorships', (req, res) => {
+    console.log('Received data for sponsorship:', req.body);
     const { SeferID, Type, TypeDetail, Amount, IsSponsored, SponsorName, SponsorContact, ForWhom, PaymentStatus, PaymentIntentID } = req.body;
+
+    console.log('Preparing to run database operation...');
     db.run("INSERT INTO Sponsorships (SeferID, Type, TypeDetail, Amount, IsSponsored, SponsorName, SponsorContact, ForWhom, PaymentStatus, PaymentIntentID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [SeferID, Type, TypeDetail, Amount, IsSponsored ? 1 : 0, SponsorName, SponsorContact, ForWhom, PaymentStatus, PaymentIntentID], function(err) {
-            if (err) res.status(400).json({ "error": err.message });
-            else res.json({ "message": "success", "data": this.lastID });
+            if (err) {
+                console.error('Error executing database query:', err.message);
+                return res.status(400).json({ "error": err.message });
+            }
+            console.log('Insert successful, ID:', this.lastID);
+            res.json({ "message": "success", "data": this.lastID });
         });
+    console.log('Database operation initiated.');
 });
+*/
+
 
 app.patch('/api/sponsorships/:id', (req, res) => {
     const { Type, TypeDetail, Amount, IsSponsored, SponsorName, SponsorContact, ForWhom, PaymentStatus, PaymentIntentID } = req.body;
@@ -267,6 +288,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'html', 'index.html'));
 });
 
+// Make sure this is below your route definitions
 app.use((req, res, next) => {
     res.status(404).send('Sorry can’t find that!');
 });
@@ -275,6 +297,7 @@ app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Something broke!');
 });
+
 
 
 app.listen(PORT, () => {
