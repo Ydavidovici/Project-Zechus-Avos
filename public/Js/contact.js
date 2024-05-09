@@ -1,1 +1,0 @@
-// main script for hadnling the contact page
