@@ -20,7 +20,7 @@ SponsorName TEXT,
 SponsorContact TEXT,
 IsSponsored BOOLEAN NOT NULL,
 ForWhom TEXT,
-PaymentStatus TEXT CHECK(PaymentStatus IN ('Paid', 'Pledged')) NOT NULL,
+PaymentStatus TEXT CHECK(PaymentStatus IN ('Paid', 'Unpaid')) NOT NULL,
 PaymentIntentID TEXT,
 FOREIGN KEY(SeferID) REFERENCES Seforim(SeferID)
 );
