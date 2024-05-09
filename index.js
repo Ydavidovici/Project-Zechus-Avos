@@ -7,6 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const session = require('express-session');
 require('dotenv').config();
+console.log("Stripe Key Loaded:", !!process.env.STRIPE_SECRET_KEY);  // Will log 'true' if the key is loaded
 
 app.use(session({
     secret: process.env.SESSION_SECRET,  // Secret key to sign the session ID cookie
@@ -25,19 +26,24 @@ const db = new sqlite3.Database('./db/pza.db', err => {
     else console.log('Database connected!');
 });
 
-const emailHelper = require('./utilities/emailHelper');
-const stripeHelper = require('./utilities/stripeHelper');
 const { formatDate, formatCurrency } = require('./utilities/dataFormatter');
 const webhookHelper = require('./utilities/webhookHelper');
+const { createCheckoutSession } = require('./utilities/stripeHelper');
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'html', 'index.html'));
+app.use((req, res, next) => {
+    let data = '';
+    req.on('data', chunk => {
+        data += chunk;
+    });
+    req.on('end', () => {
+        console.log("Raw data received:", data);
+        next();
+    });
 });
 
 // Seforim CRUD operations
@@ -112,7 +118,6 @@ app.get('/api/sponsorships', (req, res) => {
     });
 });
 
-
 app.get('/api/sponsorships/:id', (req, res) => {
     db.get("SELECT * FROM Sponsorships WHERE SponsorshipID = ?", [req.params.id], (err, row) => {
         if (err) res.status(400).json({ "error": err.message });
@@ -145,78 +150,111 @@ app.delete('/api/sponsorships/:id', (req, res) => {
     });
 });
 
-// Admin authentication routes
+app.post('/api/create-checkout-session', async (req, res) => {
+    const { items, successUrl, cancelUrl } = req.body; // Expect items to be an array of { price: 'price_ID', quantity: 1 }
+    try {
+        const session = await createCheckoutSession(items, successUrl, cancelUrl);
+        res.json({ sessionId: session.id });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+app.post('/api/stripe-webhook', express.raw({type: 'application/json'}), (req, res) => {
+    const sigHeader = req.headers['stripe-signature'];
+    let event;
+
+    try {
+        event = webhookHelper.constructEvent(req.body, sigHeader, process.env.STRIPE_WEBHOOK_SECRET);
+    } catch (err) {
+        console.error(`Webhook Error: ${err.message}`);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    // Process the event
+    switch (event.type) {
+        case 'checkout.session.completed':
+            handleCheckoutSessionCompleted(event.data.object);
+            break;
+        case 'payment_intent.succeeded':
+            handlePaymentIntentSucceeded(event.data.object);
+            break;
+        case 'payment_intent.payment_failed':
+            handlePaymentIntentFailed(event.data.object);
+            break;
+        case 'charge.refunded':
+            handleChargeRefunded(event.data.object);
+            break;
+        default:
+            console.log(`Unhandled event type ${event.type}`);
+    }
+
+    res.json({ received: true }); // Acknowledge receipt of the webhook
+});
+
+
+function handleCheckoutSessionCompleted(session) {
+    const sponsorshipId = session.metadata && session.metadata.sponsorshipId;
+    if (!sponsorshipId) {
+        console.error('No sponsorshipId provided in session metadata');
+        return; // Properly handle the error scenario, possibly alerting an admin
+    }
+    updateSponsorshipStatus(sponsorshipId, 'Paid');
+}
+
+// Ensure you handle updates in a central function that can process different statuses
+function updateSponsorshipStatus(sponsorshipId, status) {
+    const query = "UPDATE Sponsorships SET PaymentStatus = ? WHERE SponsorshipID = ?";
+    db.run(query, [status, sponsorshipId], function(err) {
+        if (err) {
+            console.error('Database update failed:', err);
+            return;
+        }
+        console.log(`Sponsorship ${sponsorshipId} updated to ${status}`);
+    });
+}
+
+
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
     db.get("SELECT password FROM Admins WHERE username = ?", [username], (err, row) => {
         if (err) {
-            res.status(500).send("Internal server error");
-        } else if (row && bcrypt.compareSync(password, row.password)) {
+            console.error("Database error:", err);
+            return res.status(500).json({ message: "Internal server error" });
+        }
+        if (!row) {
+            return res.status(401).json({ message: "Invalid credentials" });
+        }
+        if (bcrypt.compareSync(password, row.password)) {
             req.session.user = { username: username };
-            res.json({ success: true });
+            res.json({ success: true }); // Change here to handle fetch appropriately
         } else {
-            res.status(401).send("Invalid credentials");
+            res.status(401).json({ message: "Invalid credentials" });
         }
     });
 });
 
+
+// Logout route
 app.get('/logout', (req, res) => {
-    req.session.destroy(err => {
+    req.session.destroy((err) => {
         if (err) {
-            return console.log(err);
+            return res.status(500).send("Failed to log out");
         }
-        res.redirect('/login.html');
+        res.redirect('/login');
     });
-});
-
-app.post('/api/create-payment-link', async (req, res) => {
-    const { description, amount, metadata } = req.body;
-    try {
-        const paymentLink = await stripeHelper.createPaymentLink(description, amount, metadata);
-        res.json({ url: paymentLink.url });
-    } catch (error) {
-        res.status(500).json({ message: "Stripe payment link creation failed", error: error.message });
-    }
-});
-
-app.post('/send-email', async (req, res) => {
-    const { to, subject, message } = req.body;
-    try {
-        await emailHelper.sendEmail(to, subject, message);
-        res.json({ success: true, message: "Email sent successfully." });
-    } catch (error) {
-        console.error("Failed to send email:", error);
-        res.status(500).json({ success: false, message: "Failed to send email." });
-    }
-});
-
-app.post('/webhook', express.raw({type: 'application/json'}), (req, res) => {
-    const event = webhookHelper.constructEvent(req.body, req.headers['stripe-signature'], process.env.STRIPE_WEBHOOK_SECRET);
-
-    if (event.type === 'payment_intent.succeeded') {
-        const paymentIntent = event.data.object;
-        // Assume metadata contains sponsorshipId
-        const sponsorshipId = paymentIntent.metadata.sponsorshipId;
-
-        db.run("UPDATE Sponsorships SET PaymentStatus = 'Paid', PaymentIntentID = ? WHERE SponsorshipID = ?",
-            [paymentIntent.id, sponsorshipId], function(err) {
-                if (err) {
-                    console.error('Failed to update payment status:', err);
-                    res.status(500).send('Database update failed');
-                } else {
-                    res.status(200).send('Payment status updated successfully');
-                }
-            });
-    } else {
-        res.status(200).send('Webhook received unknown event type');
-    }
 });
 
 app.get('/admin', (req, res) => {
     if (!req.session.user) {
-        return res.status(401).redirect('html/login.html'); // Redirect to login if not authenticated
+        return res.redirect('/login'); // Redirect to login if not authenticated
     }
-    res.sendFile(path.join(__dirname, 'public', 'html', 'admin.html'));
+    res.sendFile(path.join(__dirname, 'public', 'html',  'admin.html'));
+});
+
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'html', 'login.html'));
 });
 
 
@@ -224,6 +262,20 @@ app.get('/success', (req, res) => {
     // Additional server-side logic could be performed here if necessary
     res.sendFile(path.join(__dirname, 'public', 'html', 'success.html'));
 });
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'html', 'index.html'));
+});
+
+app.use((req, res, next) => {
+    res.status(404).send('Sorry can’t find that!');
+});
+
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
+
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

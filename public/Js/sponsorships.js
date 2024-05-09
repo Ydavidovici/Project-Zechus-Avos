@@ -1,4 +1,4 @@
-// sponsorships.js - Shared script for handling sponsorships on both pages
+// sponsorships.js - Updated script for handling sponsorships using Stripe Checkout
 
 document.addEventListener('DOMContentLoaded', function() {
     const seferId = document.body.dataset.seferId; // Use a data attribute on the <body> tag for seferId
@@ -33,10 +33,14 @@ function sponsorSponsorship(sponsorshipId, amount) {
     const sponsorInfo = getSponsorInfo();
     if (!sponsorInfo) return;
     markSponsorshipAsPledged(sponsorshipId, sponsorInfo, () => {
-        createPaymentLink({
-            description: description,
-            amount: amount,
-            metadata: { ...sponsorInfo, sponsorshipId }
+        initiateCheckout({
+            items: [{
+                name: "Sponsorship",
+                amount: amount,
+                quantity: 1
+            }],
+            successUrl: 'https://yourdomain.com/success', // Make sure these URLs are set correctly
+            cancelUrl: 'https://yourdomain.com/cancel'
         });
     });
 }
@@ -71,38 +75,28 @@ function markSponsorshipAsPledged(sponsorshipId, sponsorInfo, callback) {
         .catch(error => console.error('Error updating sponsorship status:', error));
 }
 
-function createPaymentLink(data) {
-    fetch('/api/create-payment-link', {
+function initiateCheckout(sessionData) {
+    fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify(sessionData)
     })
         .then(response => response.json())
         .then(data => {
-            if (data.url) window.location.href = data.url;
+            if (data.sessionId) {
+                redirectToStripe(data.sessionId);
+            }
         })
-        .catch(error => console.error('Error creating payment link:', error));
+        .catch(error => console.error('Error initiating checkout:', error));
 }
 
-
-function sponsorCover() {
-    const sponsorName = document.getElementById('sponsorName').value;
-    const sponsorContact = document.getElementById('sponsorContact').value;
-
-    if (!sponsorName || !sponsorContact) {
-        alert("Please fill in all required fields.");
-        return;
-    }
-
-    const sponsorshipDetails = {
-        description: "Book Cover Sponsorship",
-        amount: 1800000, // Amount in cents ($18,000)
-        metadata: {
-            sponsorName,
-            sponsorContact,
-            sponsorshipType: 'Book Cover'
+function redirectToStripe(sessionId) {
+    const stripe = Stripe('pk_test_your_public_key_here'); // Replace with your public Stripe key
+    stripe.redirectToCheckout({
+        sessionId: sessionId
+    }).then((result) => {
+        if (result.error) {
+            alert(result.error.message);
         }
-    };
-
-    createPaymentLink(sponsorshipDetails);
+    });
 }

@@ -1,7 +1,6 @@
-// login.js
 document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
-    const loginError = document.getElementById('loginError'); // Assume there's an error display element in your HTML
+    const loginError = document.getElementById('loginError');
 
     if (loginForm) {
         loginForm.addEventListener('submit', function(event) {
@@ -9,28 +8,27 @@ document.addEventListener('DOMContentLoaded', function() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
+            if (!username.trim() || !password.trim()) {
+                loginError.textContent = 'Username and password are required.';
+                return;
+            }
+
             fetch('/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
             })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(error => Promise.reject(error));
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        window.location.href = 'admin';
+                        window.location.href = '/admin'; // Redirect on success
                     } else {
-                        throw new Error('Invalid credentials'); // Generic error for security
+                        throw new Error(data.message || 'Invalid credentials');
                     }
                 })
                 .catch(error => {
                     console.error('Login Error:', error);
-                    loginError.textContent = 'Login failed: ' + error.message; // Display error without alert
-                    document.getElementById('password').value = ''; // Clear password field
+                    loginError.textContent = 'Login failed: ' + error.message;
                 });
         });
     }
