@@ -172,7 +172,7 @@ app.delete('/api/sponsorships/:id', (req, res) => {
 });
 
 app.post('/api/create-checkout-session', async (req, res) => {
-    const { items, successUrl, cancelUrl } = req.body; // Expect items to be an array of { price: 'price_ID', quantity: 1 }
+    const { items, successUrl, cancelUrl } = req.body;  // Expect items to be an array of { description, amount, quantity, metadata }
     try {
         const session = await createCheckoutSession(items, successUrl, cancelUrl);
         res.json({ sessionId: session.id });
@@ -180,6 +180,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 
 
 app.post('/api/stripe-webhook', express.raw({type: 'application/json'}), (req, res) => {
