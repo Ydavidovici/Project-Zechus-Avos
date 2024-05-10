@@ -104,12 +104,17 @@ function formatCurrency(amount) {
     return `$${(amount / 100).toFixed(2)}`;
 }
 
-async function createStripeSession(items) {
+async function createStripeSession(items, sponsorshipId) {
     console.log('Sending these items to the server:', items);
     const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items, successUrl: window.location.origin + '/success', cancelUrl: window.location.href })
+        body: JSON.stringify({
+            items,
+            sponsorshipId,  // Add this line to pass the sponsorship ID
+            successUrl: window.location.origin + '/success',
+            cancelUrl: window.location.href
+        })
     });
     const jsonResponse = await response.json();
     if (!response.ok) {
@@ -117,4 +122,3 @@ async function createStripeSession(items) {
     }
     return jsonResponse;
 }
-

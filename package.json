@@ -6,6 +6,16 @@
   "directories": {
     "test": "tests"
   },
+  "nodemonConfig": {
+    "watch": [
+      "src/",
+      "index.js"
+    ],
+    "ignore": [
+      "*.db",
+      "node_modules/"
+    ]
+  },
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
@@ -14,8 +24,10 @@
   },
   "jest": {
     "testEnvironment": "jsdom",
-      "setupFiles": ["jest-fetch-mock/setup"]
-    },
+    "setupFiles": [
+      "jest-fetch-mock/setup"
+    ]
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

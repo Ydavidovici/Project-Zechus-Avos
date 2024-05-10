@@ -9,6 +9,80 @@ const PORT = process.env.PORT || 3000;
 const session = require('express-session');
 require('dotenv').config();
 
+
+const db = new sqlite3.Database('./db/pza.db', sqlite3.OPEN_READWRITE, (err) => {
+    if (err) console.error('Error opening database: ' + err.message);
+});
+
+app.post('/webhook', express.raw({type: 'application/json'}), (request, response) => {
+    const sig = request.headers['stripe-signature'];
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    let event;
+
+    try {
+        event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+        console.log('Handled event type:', event.type);
+
+        switch (event.type) {
+            case 'checkout.session.completed':
+                console.log('Handling checkout.session.completed', event.data.object);
+                handleCheckoutSessionCompleted(event.data.object);
+                break;
+            case 'payment_intent.succeeded':
+                const paymentIntent = event.data.object;
+                console.log(`Handling payment_intent.succeeded for PaymentIntent ID: ${paymentIntent.id}`);
+                updatePaymentStatus(paymentIntent.id, 'Paid');
+                break;
+            case 'payment_intent.created':
+                console.log('Received payment_intent.created event');
+                break;
+            default:
+                console.log(`Unhandled event type: ${event.type}`);
+        }
+    } catch (err) {
+        console.error(`Webhook Error: ${err.message}`);
+        return response.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    response.json({received: true});
+});
+
+function updatePaymentStatus(paymentIntentId, status) {
+    const sql = `UPDATE Sponsorships SET PaymentStatus = ? WHERE PaymentIntentID = ?`;
+    db.run(sql, [status, paymentIntentId], function(err) {
+        if (err) {
+            console.error(`Database error during payment status update for PaymentIntent ID ${paymentIntentId}: ${err.message}`);
+            return; // Add appropriate error handling here.
+        }
+        console.log(`Payment status updated to ${status} for PaymentIntent ID: ${paymentIntentId}`);
+    });
+}
+
+function handleCheckoutSessionCompleted(session) {
+    const { sponsorshipId, sponsorName, forWhom } = session.metadata;
+    console.log(`Received checkout.session.completed with SponsorshipID: ${sponsorshipId}`);
+
+    if (!sponsorshipId) {
+        console.error('No sponsorshipId provided in session metadata');
+        return; // More robust error handling can be added here
+    }
+    updateSponsorshipStatus(sponsorshipId, 'Paid', sponsorName, forWhom);
+}
+
+function updateSponsorshipStatus(sponsorshipId, status, sponsorName, sponsorContact) {
+    console.log(`Attempting to update sponsorship: ${sponsorshipId} to ${status}`);
+    const query = "UPDATE Sponsorships SET PaymentStatus = ?, IsSponsored = 1, SponsorName = ?, SponsorContact = ? WHERE SponsorshipID = ?";
+    db.run(query, [status, sponsorName, sponsorContact, sponsorshipId], function(err) {
+        if (err) {
+            console.error(`Database update failed: ${err.message}`);
+        } else {
+            console.log(`Sponsorship ${sponsorshipId} updated to ${status} with sponsor info`);
+        }
+    });
+}
+
+
 // Middleware for parsing JSON and URL-encoded form data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -26,12 +100,6 @@ app.use(session({
     }
 }));
 
-const dbPath = path.join(__dirname, 'db', 'pza.db');
-const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
-    if (err) console.error('Error opening database ' + err.message);
-    else console.log('Database connected!');
-});
-
 // Logging middleware for debugging
 app.use((req, res, next) => {
     console.log('Incoming Request:', req.method, req.path);
@@ -40,9 +108,50 @@ app.use((req, res, next) => {
 });
 
 
-//const { formatDate, formatCurrency } = require('./utilities/dataFormatter');
-const webhookHelper = require('./utilities/webhookHelper');
-const { createCheckoutSession } = require('./utilities/stripeHelper');
+app.post('/api/create-checkout-session', async (req, res) => {
+    try {
+        const lineItems = req.body.items.map(item => ({
+            price_data: {
+                currency: 'usd',
+                product_data: {
+                    name: item.description,
+                    metadata: item.metadata,
+                },
+                unit_amount: item.amount,
+            },
+            quantity: 1,
+        }));
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: lineItems,
+            mode: 'payment',
+            success_url: req.body.successUrl,
+            cancel_url: req.body.cancelUrl,
+            metadata: {
+                sponsorshipId: req.body.sponsorshipId // Ensure this is passed in the request body
+            }
+        });
+
+        res.json({ url: session.url });
+    } catch (error) {
+        console.error('Failed to create checkout session:', error);
+        res.status(500).json({ error: 'Failed to create checkout session', details: error.message });
+    }
+});
+
+app.get('/test-update', (req, res) => {
+    updateSponsorshipStatus(1, 'Paid');
+    res.send('Update attempted');
+});
+
+app.post('/test-checkout-session', (req, res) => {
+    const { id, sponsorshipId, sponsorName, sponsorContact } = req.body;
+    console.log(`Processing test session for sponsorship ID: ${sponsorshipId}`);
+    updateSponsorshipStatus(sponsorshipId, 'Paid', sponsorName, sponsorContact);
+    res.send('Test session processed');
+});
+
 
 // Seforim CRUD operations
 app.get('/api/seforim', (req, res) => {
@@ -163,130 +272,17 @@ app.post('/api/format/currency', (req, res) => {
     }
 });
 
-app.post('/api/create-checkout-session', async (req, res) => {
-    console.log("Request to /api/create-checkout-session with body:", req.body);
 
-    // Validate the incoming data
-    if (!req.body.items || !Array.isArray(req.body.items) || req.body.items.length === 0) {
-        console.error('Items array validation failed', req.body.items);
-        return res.status(400).json({ error: 'Items array is required and must not be empty' });
-    }
-    if (!req.body.successUrl || !req.body.cancelUrl) {
-        console.error('URL validation failed', req.body);
-        return res.status(400).json({ error: 'Success and cancel URLs are required' });
-    }
 
-    try {
-        const lineItems = req.body.items.map(item => ({
-            price_data: {
-                currency: 'usd',
-                product_data: {
-                    name: item.description,
-                    metadata: item.metadata,
-                },
-                unit_amount: item.amount,
-            },
-            quantity: 1,
-        }));
 
-        const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
-            line_items: lineItems,
-            mode: 'payment',
-            success_url: req.body.successUrl,
-            cancel_url: req.body.cancelUrl,
-        });
-
-        res.json({ url: session.url });
-    } catch (error) {
-        console.error('Failed to create checkout session:', error);
-        res.status(500).json({ error: 'Failed to create checkout session', details: error.message });
+// Apply JSON parsing middleware globally but exclude the route used for Stripe webhooks.
+app.use((req, res, next) => {
+    if (req.originalUrl === '/api/stripe-webhook') {
+        next();
+    } else {
+        express.json()(req, res, next);
     }
 });
-
-
-app.post('/api/stripe-webhook', express.raw({type: 'application/json'}), (req, res) => {
-    const sigHeader = req.headers['stripe-signature'];
-    let event;
-
-    try {
-        // Verify the event by checking the signature
-        event = stripe.webhooks.constructEvent(
-            req.body,
-            sigHeader,
-            'sk_test_51OttAEBCnbGynt76h5v1ud5DwOlCtvOMq0LTLaP9Hv4vGskNFBxThNlzF9p5hDjfPxTAwXBArWAz5l0cxMjBgUXe00liQiO4Gp'
-        );
-    } catch (err) {
-        console.error(`Webhook Error: ${err.message}`);
-        return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-
-    // Handle the event
-    try {
-        switch (event.type) {
-            case 'checkout.session.completed':
-                handleCheckoutSessionCompleted(event.data.object);
-                break;
-            case 'payment_intent.succeeded':
-                handlePaymentIntentSucceeded(event.data.object);
-                break;
-            case 'payment_intent.payment_failed':
-                handlePaymentIntentFailed(event.data.object);
-                break;
-            case 'charge.refunded':
-                handleChargeRefunded(event.data.object);
-                break;
-            default:
-                console.log(`Unhandled event type ${event.type}`);
-        }
-    } catch (handleErr) {
-        console.error(`Error handling event: ${handleErr.message}`);
-        // Optionally send an email or alert to an admin if critical handling fails
-    }
-
-    // Return a 200 response to acknowledge receipt of the event
-    res.json({received: true});
-});
-
-
-function handlePaymentIntentSucceeded(intent) {
-    console.log(`PaymentIntent ${intent.id} succeeded`);
-
-    // Update database to mark the order as paid
-    db.run("UPDATE Orders SET status = ? WHERE paymentIntentId = ?", ['Paid', intent.id], function(err) {
-        if (err) {
-            console.error(`Database error: ${err.message}`);
-            return;
-        }
-        console.log(`Order updated to Paid for PaymentIntent ID: ${intent.id}`);
-    });
-}
-
-function handlePaymentIntentFailed(intent) {
-    console.error(`PaymentIntent ${intent.id} failed with error: ${intent.last_payment_error?.message}`);
-
-    // Update database to mark the order as payment failed
-    db.run("UPDATE Orders SET status = ? WHERE paymentIntentId = ?", ['Payment Failed', intent.id], function(err) {
-        if (err) {
-            console.error(`Database error: ${err.message}`);
-            return;
-        }
-        console.log(`Order updated to Payment Failed for PaymentIntent ID: ${intent.id}`);
-    });
-}
-
-function handleChargeRefunded(charge) {
-    console.log(`Charge ${charge.id} was refunded`);
-
-    // Update database to record the refund
-    db.run("UPDATE Transactions SET status = ? WHERE chargeId = ?", ['Refunded', charge.id], function(err) {
-        if (err) {
-            console.error(`Database error: ${err.message}`);
-            return;
-        }
-        console.log(`Transaction updated to Refunded for Charge ID: ${charge.id}`);
-    });
-}
 
 
 
@@ -311,26 +307,6 @@ function formatCurrency(amount) {
 
 module.exports = { formatCurrency };
 
-function handleCheckoutSessionCompleted(session) {
-    const sponsorshipId = session.metadata && session.metadata.sponsorshipId;
-    if (!sponsorshipId) {
-        console.error('No sponsorshipId provided in session metadata');
-        return; // Properly handle the error scenario, possibly alerting an admin
-    }
-    updateSponsorshipStatus(sponsorshipId, 'Paid');
-}
-
-// Ensure you handle updates in a central function that can process different statuses
-function updateSponsorshipStatus(sponsorshipId, status) {
-    const query = "UPDATE Sponsorships SET PaymentStatus = ? WHERE SponsorshipID = ?";
-    db.run(query, [status, sponsorshipId], function(err) {
-        if (err) {
-            console.error('Database update failed:', err);
-            return;
-        }
-        console.log(`Sponsorship ${sponsorshipId} updated to ${status}`);
-    });
-}
 
 app.get('/payment-failed', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'html', 'payment-failure.html'));
@@ -407,8 +383,6 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something broke!');
 });
 
-
-
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+app.listen(3000, () => {
+    console.log('Server started on port 3000');
 });

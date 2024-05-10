@@ -1,0 +1,9 @@
+{
+  "type": "payment_intent.succeeded",
+  "data": {
+    "object": {
+      "id": "pi_1ExampleIDHere",
+      "amount": 2000
+    }
+  }
+}
