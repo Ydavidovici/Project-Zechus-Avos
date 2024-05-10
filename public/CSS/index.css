@@ -211,3 +211,29 @@ a {
     max-width: none; /* Removes max-width restriction */
   }
 }
+
+.section-container img {
+  max-width: 100%; /* Ensures images are responsive and fit within their containers */
+  height: auto; /* Maintains the aspect ratio of the images */
+  border-radius: 8px; /* Adds rounded corners for a softer, more polished look */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.25); /* Subtle shadow for depth */
+  margin-top: 20px; /* Provides spacing between the text and the image */
+}
+
+.figure-container {
+  display: flex; /* Utilizes flexbox for layout */
+  justify-content: center; /* Centers the image within the section */
+  flex-wrap: wrap; /* Allows elements to wrap in responsive layouts */
+  margin-bottom: 20px; /* Space below the figure for separation from other content */
+}
+
+figcaption {
+  color: #666; /* Sets a lighter text color for the caption */
+  font-size: 0.9em; /* Slightly smaller font size for captions */
+  margin-top: 8px; /* Space between image and its caption */
+  text-align: center; /* Centers the caption text */
+}
+
+#mekor-habracha-overview .figure-container img {
+  max-width: 100%; /* Retains responsiveness */
+}
