@@ -1,22 +1,28 @@
 document.addEventListener('DOMContentLoaded', function() {
-    loadSponsorships();
+    const seferId = document.body.getAttribute('data-sefer-id');
+    console.log('SeferID retrieved:', seferId);
+    loadSponsorships(seferId);
 });
 
-async function loadSponsorships() {
+async function fetchAvailableSponsorships(seferId) {
+    console.log(`Fetching sponsorships for SeferID: ${seferId}`);
+    const response = await fetch(`/api/sponsorships?isSponsored=false&seferId=${seferId}`);
+    if (!response.ok) throw new Error('Failed to fetch sponsorships');
+    const { data } = await response.json();
+    console.log('Data received:', data);
+    return data;
+}
+
+async function loadSponsorships(seferId) {
     try {
-        const sponsorships = await fetchAvailableSponsorships();
+        console.log('Loading sponsorships...');
+        const sponsorships = await fetchAvailableSponsorships(seferId);
+        console.log('Sponsorships:', sponsorships);
         sponsorships.forEach(sponsorship => displaySponsorship(sponsorship));
     } catch (error) {
         console.error('Failed to load sponsorships:', error);
         alert('Could not load sponsorships.');
     }
-}
-
-async function fetchAvailableSponsorships() {
-    const response = await fetch('/api/sponsorships?isSponsored=false');
-    if (!response.ok) throw new Error('Failed to fetch sponsorships');
-    const { data } = await response.json();
-    return data;
 }
 
 function displaySponsorship(sponsorship) {
