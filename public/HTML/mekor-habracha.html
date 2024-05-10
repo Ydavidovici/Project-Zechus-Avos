@@ -4,48 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../CSS/index.css">
-    <title>Mekor Habracha</title>
+    <title>Mekor Habracha - Project Zechus Avos</title>
 </head>
 <body data-sefer-id="1">
-<header>
-    <nav>
-        <li><a href="/html/index.html">Home</a></li>
-        <li><a href="/html/mekor-habracha.html">Mekor Habracha</a></li>
-        <li><a href="/html/siach-eliezer.html">Siach Eliezer</a></li>
-        <li><a href="/html/contact.html">Contact Us</a></li>
-    </nav>
-</header>
+<nav>
+    <li><a href="/html/index.html">Home</a></li>
+    <li><a href="/html/mekor-habracha.html">Mekor Habracha</a></li>
+    <li><a href="/html/siach-eliezer.html">Siach Eliezer</a></li>
+    <li><a href="/html/contact.html">Contact Us</a></li>
+</nav>
 <main class="main-container">
     <h1>Mekor Habracha</h1>
-    <section id="bookCoverSponsorship" class="section-container">
-        <h2>Book Cover Sponsorship</h2>
-        <p>Sponsor the book cover for $18,000, which includes three pages of dedications.</p>
-        <input type="text" id="sponsorName" placeholder="Your Name">
-        <input type="email" id="sponsorContact" placeholder="Your Email">
-        <button onclick="sponsorCover()">Sponsor Cover</button>
+    <section id="about" class="section-container">
+        <h2>About Mekor Habracha</h2>
+        <p>Detailed information about Mekor Habracha.</p>
     </section>
-
-    <section id="dedications" class="section-container">
-        <h2>Dedications Page</h2>
-        <p>Contribute $180 or more to be featured on the dedications page.</p>
-        <button onclick="sponsorSponsorship()">Contribute</button>
-    </section>
-
-    <section id="availableSponsorships" class="section-container">
+    <section id="sponsorships" class="section-container">
         <h2>Available Sponsorships</h2>
-        <div id="sponsorshipsList"></div>
+        <p>Choose a sponsorship level below to sponsor a part of this valuable project.</p>
+        <div id="sponsorshipsList">
+            <!-- Dynamically generated sponsorship options will be inserted here -->
+        </div>
     </section>
+    <!-- Modal for collecting sponsorship details -->
+    <div id="sponsorModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Sponsorship Details</h2>
+            <form id="sponsorForm">
+                <label for="sponsorName">Your Name:</label>
+                <input type="text" id="sponsorName" name="sponsorName" required><br>
+                <label for="forWhom">Sponsoring For:</label>
+                <input type="text" id="forWhom" name="forWhom" required><br>
+                <button type="button" onclick="submitSponsorship()">Sponsor</button>
+            </form>
+        </div>
+    </div>
 
-    <section id="generalDonations" class="section-container">
-        <h2>General Donations</h2>
-        <p>Support our cause with any amount you feel comfortable with.</p>
-        <a href="your-stripe-donation-link" target="_blank"><button>Donate</button></a>
-    </section>
 </main>
-<footer>
-    <p>© Mekor Habracha</p>
-</footer>
-<script src="../Js/sponsorships.js"></script>
 <script src="https://js.stripe.com/v3/"></script>
+<script src="../Js/sponsorships.js"></script>
 </body>
 </html>

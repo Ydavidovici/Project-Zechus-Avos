@@ -4,50 +4,43 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const path = require('path');
 const app = express();
+const stripe = require('stripe')('sk_test_51OttAEBCnbGynt76h5v1ud5DwOlCtvOMq0LTLaP9Hv4vGskNFBxThNlzF9p5hDjfPxTAwXBArWAz5l0cxMjBgUXe00liQiO4Gp');
 const PORT = process.env.PORT || 3000;
 const session = require('express-session');
 require('dotenv').config();
-console.log("Stripe Key Loaded:", !!process.env.STRIPE_SECRET_KEY);  // Will log 'true' if the key is loaded
-const logger = require('morgan');
-app.use(logger('dev'));
 
-app.use(cors());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use((req, res, next) => {
-    console.log('Incoming Request:', req.method, req.path);
-    next();
-});
-
+// Middleware for parsing JSON and URL-encoded form data
 app.use(express.json());
-
-app.use((req, res, next) => {
-    console.log('Parsed Body:', req.body);
-    next();
-});
-
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
     secret: process.env.SESSION_SECRET,  // Secret key to sign the session ID cookie
-    resave: false,                      // Avoid resaving session if unmodified
-    saveUninitialized: false,           // Don't create session until something stored
+    resave: false,
+    saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production',  // Use secure cookies in production
-        httpOnly: true,                  // Prevent client-side JS from reading the cookie
-        maxAge: 24 * 60 * 60 * 1000      // Set cookie expiration time (e.g., 24 hours)
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000
     }
 }));
 
-
 const dbPath = path.join(__dirname, 'db', 'pza.db');
-console.log("Database path:", dbPath);
-const db = new sqlite3.Database(dbPath, (err) => {
+const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
     if (err) console.error('Error opening database ' + err.message);
     else console.log('Database connected!');
 });
 
-const { formatDate, formatCurrency } = require('./utilities/dataFormatter');
+// Logging middleware for debugging
+app.use((req, res, next) => {
+    console.log('Incoming Request:', req.method, req.path);
+    console.log('Body:', req.body);
+    next();
+});
+
+
+//const { formatDate, formatCurrency } = require('./utilities/dataFormatter');
 const webhookHelper = require('./utilities/webhookHelper');
 const { createCheckoutSession } = require('./utilities/stripeHelper');
 
@@ -74,6 +67,23 @@ app.post('/api/seforim', (req, res) => {
     });
 });
 
+app.post('/api/sponsorships', (req, res) => {
+    console.log('Received data for sponsorship:', req.body);
+    const { SeferID, Type, TypeDetail, Amount, IsSponsored, SponsorName, SponsorContact, ForWhom, PaymentStatus, PaymentIntentID } = req.body;
+
+    console.log('Preparing to run database operation...');
+    db.run("INSERT INTO Sponsorships (SeferID, Type, TypeDetail, Amount, IsSponsored, SponsorName, SponsorContact, ForWhom, PaymentStatus, PaymentIntentID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [SeferID, Type, TypeDetail, Amount, IsSponsored ? 1 : 0, SponsorName, SponsorContact, ForWhom, PaymentStatus, PaymentIntentID], function(err) {
+            if (err) {
+                console.error('Error executing database query:', err.message);
+                return res.status(400).json({ "error": err.message });
+            }
+            console.log('Insert successful, ID:', this.lastID);
+            res.json({ "message": "success", "data": this.lastID });
+        });
+    console.log('Database operation initiated.');
+});
+
 app.patch('/api/sponsorships/:id', (req, res) => {
     const { IsSponsored, PaymentStatus, SponsorName, SponsorContact, ForWhom } = req.body;
     db.run("UPDATE Sponsorships SET IsSponsored = ?, PaymentStatus = ?, SponsorName = ?, SponsorContact = ?, ForWhom = ? WHERE SponsorshipID = ?",
@@ -83,7 +93,6 @@ app.patch('/api/sponsorships/:id', (req, res) => {
         });
 });
 
-
 app.delete('/api/seforim/:id', (req, res) => {
     db.run("DELETE FROM Seforim WHERE SeferID = ?", [req.params.id], function(err) {
         if (err) res.status(400).json({ "error": err.message });
@@ -91,8 +100,6 @@ app.delete('/api/seforim/:id', (req, res) => {
     });
 });
 
-// Sponsorships CRUD operations
-// Endpoint to fetch sponsorships with optional filters
 app.get('/api/sponsorships', (req, res) => {
     const { seferId, isSponsored } = req.query;
     let query = "SELECT * FROM Sponsorships WHERE 1 = 1";
@@ -115,38 +122,11 @@ app.get('/api/sponsorships', (req, res) => {
         }
         res.json({
             "message": "success",
-            "data": rows.map(row => ({
-                ...row,
-                Amount: formatCurrency(row.Amount)
-            }))
+            "data": rows // send raw data in cents
         });
     });
 });
 
-app.get('/api/sponsorships/:id', (req, res) => {
-    db.get("SELECT * FROM Sponsorships WHERE SponsorshipID = ?", [req.params.id], (err, row) => {
-        if (err) res.status(400).json({ "error": err.message });
-        else res.json({ "message": "success", "data": row });
-    });
-});
-
-
-app.post('/api/sponsorships', (req, res) => {
-    console.log('Received data for sponsorship:', req.body);
-    const { SeferID, Type, TypeDetail, Amount, IsSponsored, SponsorName, SponsorContact, ForWhom, PaymentStatus, PaymentIntentID } = req.body;
-
-    console.log('Preparing to run database operation...');
-    db.run("INSERT INTO Sponsorships (SeferID, Type, TypeDetail, Amount, IsSponsored, SponsorName, SponsorContact, ForWhom, PaymentStatus, PaymentIntentID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [SeferID, Type, TypeDetail, Amount, IsSponsored ? 1 : 0, SponsorName, SponsorContact, ForWhom, PaymentStatus, PaymentIntentID], function(err) {
-            if (err) {
-                console.error('Error executing database query:', err.message);
-                return res.status(400).json({ "error": err.message });
-            }
-            console.log('Insert successful, ID:', this.lastID);
-            res.json({ "message": "success", "data": this.lastID });
-        });
-    console.log('Database operation initiated.');
-});
 
 app.patch('/api/sponsorships/:id', (req, res) => {
     const { Type, TypeDetail, Amount, IsSponsored, SponsorName, SponsorContact, ForWhom, PaymentStatus, PaymentIntentID } = req.body;
@@ -164,51 +144,172 @@ app.delete('/api/sponsorships/:id', (req, res) => {
     });
 });
 
-app.post('/api/create-checkout-session', async (req, res) => {
-    const { items, successUrl, cancelUrl } = req.body;  // Expect items to be an array of { description, amount, quantity, metadata }
+app.post('/api/format/currency', (req, res) => {
+    console.log("Received JSON body:", req.body);  // Log the entire body to review its structure
+    if (req.body.amount === undefined) {
+        return res.status(400).json({ error: 'Amount parameter is required.' });
+    }
+
     try {
-        const session = await createCheckoutSession(items, successUrl, cancelUrl);
-        res.json({ sessionId: session.id });
+        const amount = parseInt(req.body.amount, 10);  // Ensure this conversion logic is correct
+        if (isNaN(amount)) {
+            throw new Error('Amount must be a valid number.');
+        }
+        const formattedAmount = formatCurrency(amount);
+        res.json({ formattedAmount });
     } catch (error) {
+        console.error('Error processing request:', error);
         res.status(500).json({ error: error.message });
     }
 });
 
-app.get('/config/stripe', (req, res) => {
-    res.json({ publicKey: process.env.STRIPE_PUBLIC_KEY });
+app.post('/api/create-checkout-session', async (req, res) => {
+    console.log("Request to /api/create-checkout-session with body:", req.body);
+
+    // Validate the incoming data
+    if (!req.body.items || !Array.isArray(req.body.items) || req.body.items.length === 0) {
+        console.error('Items array validation failed', req.body.items);
+        return res.status(400).json({ error: 'Items array is required and must not be empty' });
+    }
+    if (!req.body.successUrl || !req.body.cancelUrl) {
+        console.error('URL validation failed', req.body);
+        return res.status(400).json({ error: 'Success and cancel URLs are required' });
+    }
+
+    try {
+        const lineItems = req.body.items.map(item => ({
+            price_data: {
+                currency: 'usd',
+                product_data: {
+                    name: item.description,
+                    metadata: item.metadata,
+                },
+                unit_amount: item.amount,
+            },
+            quantity: 1,
+        }));
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: lineItems,
+            mode: 'payment',
+            success_url: req.body.successUrl,
+            cancel_url: req.body.cancelUrl,
+        });
+
+        res.json({ url: session.url });
+    } catch (error) {
+        console.error('Failed to create checkout session:', error);
+        res.status(500).json({ error: 'Failed to create checkout session', details: error.message });
+    }
 });
+
 
 app.post('/api/stripe-webhook', express.raw({type: 'application/json'}), (req, res) => {
     const sigHeader = req.headers['stripe-signature'];
     let event;
 
     try {
-        event = webhookHelper.constructEvent(req.body, sigHeader, process.env.STRIPE_WEBHOOK_SECRET);
+        // Verify the event by checking the signature
+        event = stripe.webhooks.constructEvent(
+            req.body,
+            sigHeader,
+            'sk_test_51OttAEBCnbGynt76h5v1ud5DwOlCtvOMq0LTLaP9Hv4vGskNFBxThNlzF9p5hDjfPxTAwXBArWAz5l0cxMjBgUXe00liQiO4Gp'
+        );
     } catch (err) {
         console.error(`Webhook Error: ${err.message}`);
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // Process the event
-    switch (event.type) {
-        case 'checkout.session.completed':
-            handleCheckoutSessionCompleted(event.data.object);
-            break;
-        case 'payment_intent.succeeded':
-            handlePaymentIntentSucceeded(event.data.object);
-            break;
-        case 'payment_intent.payment_failed':
-            handlePaymentIntentFailed(event.data.object);
-            break;
-        case 'charge.refunded':
-            handleChargeRefunded(event.data.object);
-            break;
-        default:
-            console.log(`Unhandled event type ${event.type}`);
+    // Handle the event
+    try {
+        switch (event.type) {
+            case 'checkout.session.completed':
+                handleCheckoutSessionCompleted(event.data.object);
+                break;
+            case 'payment_intent.succeeded':
+                handlePaymentIntentSucceeded(event.data.object);
+                break;
+            case 'payment_intent.payment_failed':
+                handlePaymentIntentFailed(event.data.object);
+                break;
+            case 'charge.refunded':
+                handleChargeRefunded(event.data.object);
+                break;
+            default:
+                console.log(`Unhandled event type ${event.type}`);
+        }
+    } catch (handleErr) {
+        console.error(`Error handling event: ${handleErr.message}`);
+        // Optionally send an email or alert to an admin if critical handling fails
     }
 
-    res.json({ received: true }); // Acknowledge receipt of the webhook
+    // Return a 200 response to acknowledge receipt of the event
+    res.json({received: true});
 });
+
+
+function handlePaymentIntentSucceeded(intent) {
+    console.log(`PaymentIntent ${intent.id} succeeded`);
+
+    // Update database to mark the order as paid
+    db.run("UPDATE Orders SET status = ? WHERE paymentIntentId = ?", ['Paid', intent.id], function(err) {
+        if (err) {
+            console.error(`Database error: ${err.message}`);
+            return;
+        }
+        console.log(`Order updated to Paid for PaymentIntent ID: ${intent.id}`);
+    });
+}
+
+function handlePaymentIntentFailed(intent) {
+    console.error(`PaymentIntent ${intent.id} failed with error: ${intent.last_payment_error?.message}`);
+
+    // Update database to mark the order as payment failed
+    db.run("UPDATE Orders SET status = ? WHERE paymentIntentId = ?", ['Payment Failed', intent.id], function(err) {
+        if (err) {
+            console.error(`Database error: ${err.message}`);
+            return;
+        }
+        console.log(`Order updated to Payment Failed for PaymentIntent ID: ${intent.id}`);
+    });
+}
+
+function handleChargeRefunded(charge) {
+    console.log(`Charge ${charge.id} was refunded`);
+
+    // Update database to record the refund
+    db.run("UPDATE Transactions SET status = ? WHERE chargeId = ?", ['Refunded', charge.id], function(err) {
+        if (err) {
+            console.error(`Database error: ${err.message}`);
+            return;
+        }
+        console.log(`Transaction updated to Refunded for Charge ID: ${charge.id}`);
+    });
+}
+
+
+
+app.post('/api/format/currency', (req, res) => {
+    if (!req.body.amount) {
+        return res.status(400).json({ error: 'Amount is required' });
+    }
+
+    try {
+        // Assuming amount is sent as cents and needs to be converted to a formatted string
+        const formattedAmount = formatCurrency(parseInt(req.body.amount, 10));
+        res.json({ formattedAmount });
+    } catch (error) {
+        res.status(500).json({ error: 'Error formatting amount' });
+    }
+});
+
+// Data formatter utility
+function formatCurrency(amount) {
+    return `$${(amount / 100).toFixed(2)}`;
+}
+
+module.exports = { formatCurrency };
 
 function handleCheckoutSessionCompleted(session) {
     const sponsorshipId = session.metadata && session.metadata.sponsorshipId;
@@ -230,6 +331,11 @@ function updateSponsorshipStatus(sponsorshipId, status) {
         console.log(`Sponsorship ${sponsorshipId} updated to ${status}`);
     });
 }
+
+app.get('/payment-failed', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'html', 'payment-failure.html'));
+});
+
 
 app.post('/login', (req, res) => {
     const { username, password } = req.body;

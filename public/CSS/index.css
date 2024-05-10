@@ -1,62 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;700&display=swap');
 
-
-/* Global page styles */
-body, html {
-  margin: 0;
-  padding: 0;
-  font-family: 'Open Sans', sans-serif; /* Updated to use Open Sans */
-  font-weight: 300; /* Use the lighter 300 weight for a thinner look */
-  font-size: 16px; /* Keep standard readable size */
-  background-color: #121212; /* Maintain dark background for the entire page */
-  color: #e0e0e0; /* Light gray text color for contrast */
-  line-height: 1.6;
-}
-
-
-/* Navigation bar styling */
-nav {
-  background-color: #2c2c2c; /* Dark shade remains for the navbar */
-  padding: 20px 20px; /* Increased padding for a thicker navbar */
-  border-radius: 8px; /* Rounded corners */
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* Enhanced shadow for depth */
-  margin: 20px auto; /* Centered navbar with auto margins */
-  display: flex;
-  justify-content: center;
-  max-width: 80%; /* Narrower width */
-}
-
-nav ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-nav ul li {
-  margin: 0 20px; /* Increased spacing between links */
-}
-
-nav ul li a {
-  text-decoration: none;
-  color: #e0e0e0; /* Light gray color for links */
-  font-weight: bold;
-  transition: color 0.3s;
-}
-
-nav ul li a:hover {
-  color: #9a68b2; /* Subtle purple for hover effect */
-}
-
-/* Adding a subtle color accent to the navbar */
-nav {
-  border-bottom: 3px solid #4a4e69; /* Dark blue shade */
-}
-
-
-/* Styling main content area */
 .main-container {
   max-width: 1200px;
   margin: 20px auto;
@@ -74,17 +17,6 @@ nav {
   background-color: #262626; /* Even lighter shade for sections to differentiate */
 }
 
-/* Footer styling */
-footer {
-  background-color: #2c2c2c;
-  color: #ccc;
-  text-align: center;
-  padding: 20px;
-  border-radius: 8px;
-  margin: 20px auto;
-  width: calc(100% - 40px);
-}
-
 /* Responsive behavior */
 @media screen and (max-width: 768px) {
   .main-container, nav, footer {
@@ -98,10 +30,7 @@ footer {
     }
   }
 
-  nav, footer {
-    margin: 20px auto;
-  }
-}
+
 
 /* Success Page Styling */
 .success-container {
@@ -255,9 +184,101 @@ a:hover, button:hover {
   opacity: 0; /* Start elements out as invisible */
 }
 
-/* Responsive animations adjustments for smaller screens */
-@media (max-width: 768px) {
-  .section-container {
-    animation: none;
+
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;700&display=swap');
+
+/* Global page styles */
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  background-color: #121212;
+  color: #e0e0e0;
+  line-height: 1.6;
+}
+
+/* Navigation bar styling */
+nav {
+  background-color: #6A4A7B; /* Soft purple */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  margin: 20px auto;
+  display: flex;
+  justify-content: center;
+  max-width: 80%;
+}
+
+nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+nav ul li {
+  margin: 0 20px;
+}
+
+nav ul li a {
+  text-decoration: none;
+  color: #FFFFFF; /* White text for contrast */
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+nav ul li a:hover {
+  color: #EEDCFF; /* Lighter purple on hover */
+}
+
+/* Footer styling */
+footer {
+  background-color: #6A4A7B; /* Same soft purple as navbar */
+  color: #FFFFFF; /* White text for better readability */
+  text-align: center;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px auto;
+  width: calc(100% - 40px);
+}
+
+/* Other styles remain unchanged for brevity */
+
+/* Responsive behavior */
+@media screen and (max-width: 768px) {
+  .main-container, nav, footer {
+    padding: 20px;
+    width: auto;
+    margin: 20px;
+    box-sizing: border-box;
+  }
+  nav, footer {
+    margin: 20px auto;
   }
 }

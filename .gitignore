@@ -331,3 +331,4 @@ bfg.jar
 .xml!/
 apple-developer-merchantid-domain-association
 !/apple-developer-merchantid-domain-association
+!/db/pza.db

@@ -13,21 +13,36 @@
     <li><a href="/html/siach-eliezer.html">Siach Eliezer</a></li>
     <li><a href="/html/contact.html">Contact Us</a></li>
 </nav>
-    <main class="main-container">
-        <h1>Siach Eliezer</h1>
-        <section id="About" class="section-container">
-            <h2>About Siach Eliezer</h2>
-            <p>Siach Eliezer is a sefer by Yampoli Rebbe on deep chassidus/kabbalistic
-                topics.</p>
-        </section>
-        <section id="sponsorships" class="section-container">
-            <h2>Available Sponsorships</h2>
-            <p>Choose a sponsorship level below to sponsor a Parshah.</p>
-            <div id="sponsorship-list">
-                <!-- Dynamically generated sponsorship options will be inserted here -->
-            </div>
-        </section>
-    </main>
-    <script src="../Js/sponsorships.js"
-    <script src="https://js.stripe.com/v3/"></script>
+<main class="main-container">
+    <h1>Siach Eliezer</h1>
+    <section id="About" class="section-container">
+        <h2>About Siach Eliezer</h2>
+        <p>Siach Eliezer is a sefer by Yampoli Rebbe on deep chassidus/kabbalistic topics.</p>
+    </section>
+    <section id="sponsorships" class="section-container">
+        <h2>Available Sponsorships</h2>
+        <p>Choose a sponsorship level below to sponsor a Parshah.</p>
+        <div id="sponsorshipsList">
+            <!-- Dynamically generated sponsorship options will be inserted here -->
+        </div>
+    </section>
+    <!-- Modal for collecting sponsorship details -->
+    <div id="sponsorModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Sponsorship Details</h2>
+            <form id="sponsorForm">
+                <label for="sponsorName">Your Name:</label>
+                <input type="text" id="sponsorName" name="sponsorName" required><br>
+                <label for="forWhom">Sponsoring For:</label>
+                <input type="text" id="forWhom" name="forWhom" required><br>
+                <button type="button" onclick="submitSponsorship()">Sponsor</button>
+            </form>
+        </div>
+    </div>
+
+</main>
+<script src="https://js.stripe.com/v3/"></script>
+<script src="../Js/sponsorships.js"></script>
 </body>
+</html>
