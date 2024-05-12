@@ -237,3 +237,7 @@ figcaption {
 #mekor-habracha-overview .figure-container img {
   max-width: 100%; /* Retains responsiveness */
 }
+
+.hidden {
+  display: none;
+}

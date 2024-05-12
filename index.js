@@ -193,13 +193,26 @@ app.post('/api/sponsorships', (req, res) => {
     console.log('Database operation initiated.');
 });
 
-app.patch('/api/sponsorships/:id', (req, res) => {
-    const { IsSponsored, PaymentStatus, SponsorName, SponsorContact, ForWhom } = req.body;
-    db.run("UPDATE Sponsorships SET IsSponsored = ?, PaymentStatus = ?, SponsorName = ?, SponsorContact = ?, ForWhom = ? WHERE SponsorshipID = ?",
-        [IsSponsored ? 1 : 0, PaymentStatus, SponsorName, SponsorContact, ForWhom, req.params.id], function(err) {
-            if (err) res.status(400).json({ "error": err.message });
-            else res.json({ "message": "success", "data": this.changes });
+// This route should handle updating the sponsorship status
+app.patch('/api/sponsorships/:id', async (req, res) => {
+    const { IsSponsored } = req.body;
+    const sponsorshipId = req.params.id;
+
+    try {
+        const sql = "UPDATE Sponsorships SET IsSponsored = ? WHERE SponsorshipID = ?";
+        db.run(sql, [IsSponsored ? 1 : 0, sponsorshipId], function(err) {
+            if (err) {
+                console.error('Error updating sponsorship status:', err.message);
+                res.status(500).json({ error: err.message });
+            } else if (this.changes > 0) {
+                res.json({ message: "Sponsorship status updated successfully", data: this.changes });
+            } else {
+                res.status(404).json({ error: "No sponsorship found with that ID" });
+            }
         });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 app.delete('/api/seforim/:id', (req, res) => {

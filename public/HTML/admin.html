@@ -1,3 +1,4 @@
+<!-- Example HTML structure for Admin Panel with Forms initially hidden -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,17 +32,22 @@
     <section class="section-container">
         <h2>Sponsorships</h2>
         <button id="addSponsorshipFormButton">Add New Sponsorship</button>
-        <div>
-            <button id="fetchAllSponsorships">All</button>
-            <button id="fetchAvailableSponsorships">Available</button>
-            <button id="fetchUnavailableSponsorships">Unavailable</button>
-        </div>
         <div id="addSponsorshipForm" class="hidden">
             <input type="text" id="newSponsorshipSeferID" placeholder="Sefer ID">
             <input type="text" id="newSponsorshipType" placeholder="Type (Mitzvah or Parshah)">
             <input type="text" id="newSponsorshipDetail" placeholder="Detail">
             <input type="number" id="newSponsorshipAmount" placeholder="Amount">
+            <select id="newSponsorshipPaymentStatus">
+                <option value="Paid">Paid</option>
+                <option value="Unpaid" selected>Unpaid</option>
+            </select>
             <button id="submitSponsorshipButton">Submit New Sponsorship</button>
+        </div>
+
+        <div>
+            <button id="fetchAllSponsorships">All</button>
+            <button id="fetchAvailableSponsorships">Available</button>
+            <button id="fetchUnavailableSponsorships">Unavailable</button>
         </div>
         <div id="sponsorshipsList"></div>
     </section>
@@ -53,6 +59,5 @@
 </footer>
 <div id="loadingIndicator" class="hidden">Loading...</div>
 <script src="../js/admin.js"></script>
-<script src="https://js.stripe.com/v3/"></script>
 </body>
 </html>
