@@ -19,8 +19,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "jest",
-    "postinstall": "sqlite3 db/pza.db < db/schema.sql"
+    "test": "jest"
   },
   "jest": {
     "testEnvironment": "jsdom",
@@ -40,7 +39,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
-    "sqlite3": "^5.1.7",
+    "pg": "^8.9.0",
     "stripe": "^14.25.0"
   }
 }
