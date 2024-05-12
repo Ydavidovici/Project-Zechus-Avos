@@ -5,23 +5,18 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function fetchAvailableSponsorships(seferId) {
-    logMessage(`Fetching sponsorships for SeferID: ${seferId}`);
     try {
         const response = await fetch(`/api/sponsorships?isSponsored=false&seferId=${seferId}`);
         if (!response.ok) throw new Error('Failed to fetch sponsorships');
         const { data } = await response.json();
-        logMessage(`Data received: ${JSON.stringify(data)}`);
         return data;
     } catch (error) {
-        logMessage(`Error: ${error.message}`);
-        console.error('Failed to load sponsorships:', error);
         alert('Could not load sponsorships.');
     }
 }
 
 async function loadSponsorships(seferId) {
     try {
-        logMessage('Loading sponsorships...');
         const sponsorships = await fetchAvailableSponsorships(seferId);
         sponsorships.forEach(sponsorship => displaySponsorship(sponsorship));
     } catch (error) {
@@ -38,7 +33,6 @@ function displaySponsorship(sponsorship) {
         <button id="sponsorBtn-${sponsorship.SponsorshipID}">Sponsor This</button>
     `;
     container.appendChild(sponsorshipElement);
-    logMessage(`Displayed sponsorship: ${sponsorship.SponsorshipID}`);
 
     document.getElementById(`sponsorBtn-${sponsorship.SponsorshipID}`).addEventListener('click', () => {
         openModal(sponsorship);
@@ -65,7 +59,6 @@ async function submitSponsorship() {
     const sponsorName = document.getElementById('sponsorName').value.trim();
     const forWhom = document.getElementById('forWhom').value.trim();
     if (!sponsorName || !forWhom || !sponsorship) {
-        logMessage('Submission Error: Required fields are missing');
         alert('Please fill in all required fields.');
         return;
     }
@@ -79,11 +72,9 @@ async function submitSponsorship() {
         if (session.url) {
             window.location.href = session.url;
         } else {
-            logMessage('No URL received on session creation');
             alert('Failed to redirect to checkout.');
         }
     } catch (error) {
-        logMessage(`Checkout Error: ${error.message}`);
         alert('Failed to initiate checkout. Please try again.');
     }
 }
@@ -94,7 +85,6 @@ function formatCurrency(amount) {
 
 async function createStripeSession(items) {
     const sponsorship = JSON.parse(sessionStorage.getItem('currentSponsorship'));
-    console.log('Sending these items to the server:', items);
     try {
         const response = await fetch('/api/create-checkout-session', {
             method: 'POST',
@@ -116,22 +106,6 @@ async function createStripeSession(items) {
         }
         return jsonResponse;
     } catch (error) {
-        logMessage(`Session Creation Error: ${error.message}`);
         throw error;
     }
 }
-
-
-function logMessage(message) {
-    const currentLog = localStorage.getItem('log') || '';
-    localStorage.setItem('log', currentLog + new Date().toISOString() + ': ' + message + '\n');
-}
-
-function showLogs() {
-    console.log(localStorage.getItem('log'));
-}
-
-window.onunload = function() {
-    sessionStorage.removeItem('currentSponsorship');
-    showLogs(); // Optionally show logs when unloading for debugging
-};

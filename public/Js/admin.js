@@ -40,7 +40,6 @@ async function submitSefer() {
             toggleForm('addSeferForm');
         }
     } catch (error) {
-        console.error('Error adding sefer:', error);
         alert('Error adding sefer: ' + error.message);
     }
 }
@@ -66,7 +65,6 @@ async function submitSponsorship() {
         fetchSponsorships('all');
         toggleForm('addSponsorshipForm');
     } catch (error) {
-        console.error('Error adding sponsorship:', error);
         alert('Error adding sponsorship: ' + error.message);
     }
 }
@@ -79,11 +77,9 @@ async function toggleSponsorshipStatus(sponsorshipId, isSponsored) {
             body: JSON.stringify({ IsSponsored: isSponsored })
         });
         if (response.message) {
-            console.log('Sponsorship status updated successfully!');
             fetchSponsorships('all');
         }
     } catch (error) {
-        console.error('Error updating sponsorship status:', error);
         alert('Error updating sponsorship status: ' + error.message);
     }
 }
@@ -127,7 +123,6 @@ function displaySponsorships(sponsorships) {
     list.innerHTML = sponsorships.map(sponsorship => `<div><p>ID: ${sponsorship.SponsorshipID} - ${sponsorship.TypeDetail} - $${sponsorship.Amount / 100}</p><p>Status: ${sponsorship.IsSponsored ? `Sponsored by ${sponsorship.SponsorName}` : 'Available'}</p><button onclick="toggleSponsorshipStatus(${sponsorship.SponsorshipID}, ${!sponsorship.IsSponsored})">Toggle Status</button><button onclick="deleteSponsorship(${sponsorship.SponsorshipID})">Delete</button></div>`).join('');
 }
 
-
 async function deleteSefer(seferId) {
     try {
         const response = await apiRequest(`/api/seforim/${seferId}`, { method: 'DELETE' });
@@ -136,7 +131,6 @@ async function deleteSefer(seferId) {
             fetchSeforim();
         }
     } catch (error) {
-        console.error('Error deleting sefer:', error);
         alert('Error deleting sefer: ' + error.message);
     }
 }
@@ -149,7 +143,6 @@ async function deleteSponsorship(sponsorshipId) {
             fetchSponsorships('all');  // Refresh the list
         }
     } catch (error) {
-        console.error('Failed to delete sponsorship:', error);
         alert('Error deleting sponsorship: ' + error.message);
     }
 }

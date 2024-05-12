@@ -15,36 +15,27 @@ const db = new sqlite3.Database('./db/pza.db', sqlite3.OPEN_READWRITE, (err) => 
 });
 
 app.post('/webhook', express.raw({type: 'application/json'}), (request, response) => {
-    console.log('webhook api hit')
     const sig = request.headers['stripe-signature'];
-
     try {
         const event = stripe.webhooks.constructEvent(request.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-        console.log('Webhook received:', event);
 
         switch (event.type) {
             case 'checkout.session.completed':
-                console.log('Handling checkout.session.completed with data:', event.data.object);
                 handleCheckoutSessionCompleted(event.data.object);
                 break;
             case 'payment_intent.succeeded':
-                console.log('Handling payment_intent.succeeded with PaymentIntent:', event.data.object);
                 updatePaymentStatus(event.data.object.id, 'Paid');
                 break;
             default:
-                console.log(`Unhandled event type: ${event.type}`);
         }
     } catch (err) {
-        console.error(`Webhook Error: ${err.message}`);
         response.status(400).send(`Webhook Error: ${err.message}`);
     }
-
     response.json({received: true});
 });
 
 
 function updatePaymentStatus(paymentIntentId, status) {
-    console.log(`Updating payment status for PaymentIntent ID: ${paymentIntentId} to ${status}`);
     const sql = `UPDATE Sponsorships SET PaymentStatus = ? WHERE PaymentIntentID = ?`;
     db.run(sql, [status, paymentIntentId], function(err) {
         if (err) {
@@ -56,24 +47,18 @@ function updatePaymentStatus(paymentIntentId, status) {
 }
 
 function handleCheckoutSessionCompleted(session) {
-    console.log('Session metadata at completion:', session.metadata);
     const { sponsorshipId, sponsorName, forWhom } = session.metadata;
-
     if (!sponsorshipId) {
         console.error('No sponsorshipId provided in session metadata');
         return; // Stop further execution if sponsorshipId is missing
     }
-
-    console.log(`Processing completion for sponsorship ID: ${sponsorshipId} with sponsor name: ${sponsorName} and for whom: ${forWhom}`);
     updateSponsorshipStatus(sponsorshipId, 'Paid', sponsorName, forWhom);
 }
 
 function updateSponsorshipStatus(sponsorshipId, status, sponsorName, forWhom) {
-    console.log(`Attempting to update sponsorship: ${sponsorshipId} to ${status} with sponsor ${sponsorName} and for ${forWhom}`);
     const sql = `UPDATE Sponsorships SET PaymentStatus = ?, SponsorName = ?, ForWhom = ?, IsSponsored = 1 WHERE SponsorshipID = ?`;
     db.run(sql, [status, sponsorName, forWhom, sponsorshipId], function(err) {
         if (err) {
-            console.error(`Failed to update sponsorship ${sponsorshipId}: ${err.message}`);
             return;
         }
         console.log(`Sponsorship ${sponsorshipId} updated to ${status} with sponsor info`);
@@ -106,7 +91,6 @@ app.use((req, res, next) => {
 
 
 app.post('/api/create-checkout-session', async (req, res) => {
-    console.log('Received request to create checkout session:', req.body);
     try {
         const lineItems = req.body.items.map(item => {
             console.log('Processing item:', item);
@@ -122,10 +106,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
                 quantity: 1,
             };
         });
-
         const metadata = req.body.metadata || {};
-        console.log('Metadata for checkout session:', metadata);
-
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: lineItems,
@@ -134,27 +115,12 @@ app.post('/api/create-checkout-session', async (req, res) => {
             cancel_url: req.body.cancelUrl,
             metadata: metadata
         });
-
-        console.log('Checkout session created successfully:', session.id);
         res.json({ url: session.url });
     } catch (error) {
         console.error('Failed to create checkout session:', error);
         res.status(500).json({ error: 'Failed to create checkout session', details: error.message });
     }
 });
-
-app.get('/test-update', (req, res) => {
-    updateSponsorshipStatus(1, 'Paid');
-    res.send('Update attempted');
-});
-
-app.post('/test-checkout-session', (req, res) => {
-    const { id, sponsorshipId, sponsorName, sponsorContact } = req.body;
-    console.log(`Processing test session for sponsorship ID: ${sponsorshipId}`);
-    updateSponsorshipStatus(sponsorshipId, 'Paid', sponsorName, sponsorContact);
-    res.send('Test session processed');
-});
-
 
 // Seforim CRUD operations
 app.get('/api/seforim', (req, res) => {
@@ -180,23 +146,17 @@ app.post('/api/seforim', (req, res) => {
 });
 
 app.post('/api/sponsorships', (req, res) => {
-    console.log('Received data for sponsorship:', req.body);
     const { SeferID, Type, TypeDetail, Amount, IsSponsored, SponsorName, SponsorContact, ForWhom, PaymentStatus, PaymentIntentID } = req.body;
-
-    console.log('Preparing to run database operation...');
     db.run("INSERT INTO Sponsorships (SeferID, Type, TypeDetail, Amount, IsSponsored, SponsorName, SponsorContact, ForWhom, PaymentStatus, PaymentIntentID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [SeferID, Type, TypeDetail, Amount, IsSponsored ? 1 : 0, SponsorName, SponsorContact, ForWhom, PaymentStatus, PaymentIntentID], function(err) {
             if (err) {
                 console.error('Error executing database query:', err.message);
                 return res.status(400).json({ "error": err.message });
             }
-            console.log('Insert successful, ID:', this.lastID);
             res.json({ "message": "success", "data": this.lastID });
         });
-    console.log('Database operation initiated.');
 });
 
-// This route should handle updating the sponsorship status
 app.patch('/api/sponsorships/:id', async (req, res) => {
     const { IsSponsored } = req.body;
     const sponsorshipId = req.params.id;
@@ -229,17 +189,14 @@ app.get('/api/sponsorships', (req, res) => {
     const { seferId, isSponsored } = req.query;
     let query = "SELECT * FROM Sponsorships WHERE 1 = 1";
     const params = [];
-
     if (seferId) {
         query += " AND SeferID = ?";
         params.push(seferId);
     }
-
     if (isSponsored !== undefined) {
         query += " AND IsSponsored = ?";
         params.push(isSponsored === 'true' ? 1 : 0);
     }
-
     db.all(query, params, (err, rows) => {
         if (err) {
             res.status(400).json({ "error": err.message });
@@ -270,11 +227,9 @@ app.delete('/api/sponsorships/:id', (req, res) => {
 });
 
 app.post('/api/format/currency', (req, res) => {
-    console.log("Received JSON body:", req.body);  // Log the entire body to review its structure
     if (req.body.amount === undefined) {
         return res.status(400).json({ error: 'Amount parameter is required.' });
     }
-
     try {
         const amount = parseInt(req.body.amount, 10);  // Ensure this conversion logic is correct
         if (isNaN(amount)) {
@@ -288,7 +243,6 @@ app.post('/api/format/currency', (req, res) => {
     }
 });
 
-// Apply JSON parsing middleware globally but exclude the route used for Stripe webhooks.
 app.use((req, res, next) => {
     if (req.originalUrl === '/api/stripe-webhook') {
         next();
@@ -301,9 +255,7 @@ app.post('/api/format/currency', (req, res) => {
     if (!req.body.amount) {
         return res.status(400).json({ error: 'Amount is required' });
     }
-
     try {
-        // Assuming amount is sent as cents and needs to be converted to a formatted string
         const formattedAmount = formatCurrency(parseInt(req.body.amount, 10));
         res.json({ formattedAmount });
     } catch (error) {
@@ -311,7 +263,6 @@ app.post('/api/format/currency', (req, res) => {
     }
 });
 
-// Data formatter utility
 function formatCurrency(amount) {
     return `$${(amount / 100).toFixed(2)}`;
 }
