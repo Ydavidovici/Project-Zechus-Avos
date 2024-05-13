@@ -7,6 +7,7 @@ const app = express();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const PORT = process.env.PORT || 3000;
 const session = require('express-session');
+const fs = require('fs');
 require('dotenv').config();
 
 const pool = new Pool({
@@ -97,6 +98,17 @@ app.get('/test-db', async (req, res) => {
 // Test static file serving
 app.get('/test-file', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'html', 'index.html'));
+});
+
+// List files in the public/html directory
+app.get('/list-files', (req, res) => {
+    const directoryPath = path.join(__dirname, 'public', 'html');
+    fs.readdir(directoryPath, (err, files) => {
+        if (err) {
+            return res.status(500).json({ error: 'Unable to scan directory' });
+        }
+        res.json({ files });
+    });
 });
 
 // Define routes for seforim operations
