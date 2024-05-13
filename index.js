@@ -83,6 +83,22 @@ app.use(session({
     }
 }));
 
+// Test database connection
+app.get('/test-db', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT NOW()');
+        res.json({ message: 'Database connected', time: result.rows[0] });
+    } catch (err) {
+        console.error('Database connection error:', err);
+        res.status(500).json({ message: 'Database connection error', error: err.message });
+    }
+});
+
+// Test static file serving
+app.get('/test-file', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'html', 'index.html'));
+});
+
 // Define routes for seforim operations
 app.get('/api/seforim', async (req, res) => {
     try {
@@ -238,7 +254,8 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-    console.error(err.stack);
+    console.error('Error:', err.message);
+    console.error('Stack:', err.stack);
     res.status(500).send('Something broke!');
 });
 
