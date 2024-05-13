@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
     const seferId = document.body.getAttribute('data-sefer-id');
-    logMessage(`DOMContentLoaded: SeferID retrieved: ${seferId}`);
     loadSponsorships(seferId);
 });
 
