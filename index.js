@@ -17,6 +17,57 @@ const pool = new Pool({
     }
 });
 
+app.post('/webhook', express.raw({type: 'application/json'}), async (request, response) => {
+    const sig = request.headers['stripe-signature'];
+    try {
+        const event = stripe.webhooks.constructEvent(request.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+        switch (event.type) {
+            case 'checkout.session.completed':
+                await handleCheckoutSessionCompleted(event.data.object);
+                break;
+            case 'payment_intent.succeeded':
+                await updatePaymentStatus(event.data.object.id, 'Paid');
+                break;
+            default:
+                console.log(`Unhandled event type ${event.type}`);
+        }
+        response.json({received: true});
+    } catch (err) {
+        console.error(`Webhook Error: ${err.message}`);
+        response.status(400).send(`Webhook Error: ${err.message}`);
+    }
+});
+
+async function updatePaymentStatus(paymentIntentId, status) {
+    const sql = `UPDATE Sponsorships SET PaymentStatus = $1 WHERE PaymentIntentID = $2`;
+    try {
+        await pool.query(sql, [status, paymentIntentId]);
+        console.log(`Payment status updated to ${status} for PaymentIntent ID: ${paymentIntentId}`);
+    } catch (err) {
+        console.error(`Error updating payment status: ${err.message}`);
+    }
+}
+
+async function handleCheckoutSessionCompleted(session) {
+    const { metadata } = session;
+    if (metadata && metadata.sponsorshipId) {
+        const { sponsorshipId, sponsorName, forWhom } = metadata;
+        await updateSponsorshipStatus(sponsorshipId, 'Paid', sponsorName, forWhom);
+    } else {
+        console.error('No sponsorshipId provided in session metadata');
+    }
+}
+
+async function updateSponsorshipStatus(sponsorshipId, status, sponsorName, forWhom) {
+    const sql = `UPDATE Sponsorships SET PaymentStatus = $1, SponsorName = $2, ForWhom = $3, IsSponsored = true WHERE SponsorshipID = $4`;
+    try {
+        await pool.query(sql, [status, sponsorName, forWhom, sponsorshipId]);
+        console.log(`Sponsorship ${sponsorshipId} updated with status ${status}`);
+    } catch (err) {
+        console.error(`Failed to update sponsorship: ${err.message}`);
+    }
+}
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
@@ -90,7 +141,6 @@ app.post('/api/seforim', async (req, res) => {
     }
 });
 
-// Define routes for sponsorships operations
 app.get('/api/sponsorships', async (req, res) => {
     const { seferId, isSponsored } = req.query;
     let query = "SELECT * FROM Sponsorships WHERE 1=1";
@@ -105,11 +155,14 @@ app.get('/api/sponsorships', async (req, res) => {
     }
     try {
         const result = await pool.query(query, params);
+        console.log('Sponsorships fetched:', result.rows); // Add logging here
         res.json({ message: "success", data: result.rows });
     } catch (err) {
+        console.error('Error fetching sponsorships:', err.message);
         res.status(400).json({ error: err.message });
     }
 });
+
 
 app.post('/api/sponsorships', async (req, res) => {
     const { SeferID, Type, TypeDetail, Amount, IsSponsored, SponsorName, SponsorContact, ForWhom, PaymentStatus, PaymentIntentID } = req.body;
@@ -171,57 +224,60 @@ app.post('/login', async (req, res) => {
             const match = await bcrypt.compare(password, result.rows[0].password);
             if (match) {
                 req.session.user = { username };
-                res.json({ success: true, message: "Login successful!" });
+                console.log('Session created:', req.session.user); // Log session creation
+                return res.json({ success: true, message: "Login successful!" });
             } else {
-                res.status(401).json({ message: "Invalid credentials" });
+                return res.status(401).json({ message: "Invalid credentials" });
             }
         } else {
-            res.status(401).json({ message: "Invalid credentials" });
+            return res.status(401).json({ message: "Invalid credentials" });
         }
     } catch (err) {
         console.error("Database error:", err);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+
+// Protect admin route
+app.get('/admin', (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/login');
+    } else {
+        return res.sendFile(path.join(__dirname, 'public', 'html', 'admin.html'));
     }
 });
 
 app.get('/logout', (req, res) => {
     req.session.destroy(err => {
         if (err) {
-            res.status(500).send("Failed to log out");
+            return res.status(500).send("Failed to log out");
         } else {
-            res.redirect('/login');
+            return res.redirect('/login');
         }
     });
 });
 
-app.get('/admin', (req, res) => {
-    if (!req.session.user) {
-        res.redirect('/login');
-    } else {
-        res.sendFile(path.join(__dirname, 'public', 'html', 'admin.html'));
-    }
-});
-
 app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'html', 'login.html'));
+    return res.sendFile(path.join(__dirname, 'public', 'html', 'login.html'));
 });
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'html', 'index.html'));
+    return res.sendFile(path.join(__dirname, 'public', 'html', 'index.html'));
 });
 
 app.get('/success', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'html', 'success.html'));
+    return res.sendFile(path.join(__dirname, 'public', 'html', 'success.html'));
 });
 
 app.use((req, res, next) => {
-    res.status(404).send('Sorry can’t find that!');
+    return res.status(404).send('Sorry can’t find that!');
 });
 
 app.use((err, req, res, next) => {
     console.error('Error:', err.message);
     console.error('Stack:', err.stack);
-    res.status(500).send('Something broke!');
+    return res.status(500).send('Something broke!');
 });
 
 app.listen(PORT, () => {
