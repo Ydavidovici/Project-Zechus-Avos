@@ -17,57 +17,6 @@ const pool = new Pool({
     }
 });
 
-app.post('/webhook', express.raw({type: 'application/json'}), async (request, response) => {
-    const sig = request.headers['stripe-signature'];
-    try {
-        const event = stripe.webhooks.constructEvent(request.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-        switch (event.type) {
-            case 'checkout.session.completed':
-                await handleCheckoutSessionCompleted(event.data.object);
-                break;
-            case 'payment_intent.succeeded':
-                await updatePaymentStatus(event.data.object.id, 'Paid');
-                break;
-            default:
-                console.log(`Unhandled event type ${event.type}`);
-        }
-        response.json({received: true});
-    } catch (err) {
-        console.error(`Webhook Error: ${err.message}`);
-        response.status(400).send(`Webhook Error: ${err.message}`);
-    }
-});
-
-async function updatePaymentStatus(paymentIntentId, status) {
-    const sql = `UPDATE Sponsorships SET PaymentStatus = $1 WHERE PaymentIntentID = $2`;
-    try {
-        await pool.query(sql, [status, paymentIntentId]);
-        console.log(`Payment status updated to ${status} for PaymentIntent ID: ${paymentIntentId}`);
-    } catch (err) {
-        console.error(`Error updating payment status: ${err.message}`);
-    }
-}
-
-async function handleCheckoutSessionCompleted(session) {
-    const { metadata } = session;
-    if (metadata && metadata.sponsorshipId) {
-        const { sponsorshipId, sponsorName, forWhom } = metadata;
-        await updateSponsorshipStatus(sponsorshipId, 'Paid', sponsorName, forWhom);
-    } else {
-        console.error('No sponsorshipId provided in session metadata');
-    }
-}
-
-async function updateSponsorshipStatus(sponsorshipId, status, sponsorName, forWhom) {
-    const sql = `UPDATE Sponsorships SET PaymentStatus = $1, SponsorName = $2, ForWhom = $3, IsSponsored = true WHERE SponsorshipID = $4`;
-    try {
-        await pool.query(sql, [status, sponsorName, forWhom, sponsorshipId]);
-        console.log(`Sponsorship ${sponsorshipId} updated with status ${status}`);
-    } catch (err) {
-        console.error(`Failed to update sponsorship: ${err.message}`);
-    }
-}
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
@@ -251,6 +200,10 @@ app.get('/admin', (req, res) => {
     } else {
         res.sendFile(path.join(__dirname, 'public', 'html', 'admin.html'));
     }
+});
+
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'html', 'login.html'));
 });
 
 app.get('/', (req, res) => {
