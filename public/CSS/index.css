@@ -241,3 +241,24 @@ figcaption {
 .hidden {
   display: none;
 }
+
+/* Existing CSS rules */
+
+.donate-button {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  background-color: #8a2be2; /* Purple color */
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.donate-button:hover {
+  background-color: #7b1fa2; /* Darker purple on hover */
+}
+
+/* Existing CSS rules */
