@@ -69,7 +69,6 @@ async function submitSponsorship() {
     }
 }
 
-
 async function toggleSponsorshipStatus(sponsorshipId, isSponsored) {
     try {
         const response = await apiRequest(`/api/sponsorships/${sponsorshipId}`, {
@@ -104,7 +103,11 @@ async function fetchSeforim() {
 }
 
 async function fetchSponsorships(filter) {
-    const url = `/api/sponsorships${filter !== 'all' ? `?isSponsored=${filter === 'available' ? 'false' : 'true'}` : ''}`;
+    let url = '/api/sponsorships';
+    if (filter !== 'all') {
+        const isSponsored = filter === 'available' ? 'false' : 'true';
+        url += `?isSponsored=${isSponsored}`;
+    }
     try {
         const data = await apiRequest(url);
         displaySponsorships(data.data);
@@ -115,12 +118,31 @@ async function fetchSponsorships(filter) {
 
 function displaySeforim(seforim) {
     const list = document.getElementById('seforimList');
-    list.innerHTML = seforim.map(sefer => `<div><p>${sefer.SeferName} <button onclick="deleteSefer(${sefer.SeferID})">Delete</button></p></div>`).join('');
+    if (!seforim || seforim.length === 0) {
+        list.innerHTML = '<p>No seforim available.</p>';
+        return;
+    }
+    list.innerHTML = seforim.map(sefer => `
+        <div>
+            <p>${sefer.sefername || 'No Name'} <button onclick="deleteSefer(${sefer.seferid})">Delete</button></p>
+        </div>
+    `).join('');
 }
 
 function displaySponsorships(sponsorships) {
     const list = document.getElementById('sponsorshipsList');
-    list.innerHTML = sponsorships.map(sponsorship => `<div><p>ID: ${sponsorship.SponsorshipID} - ${sponsorship.TypeDetail} - $${sponsorship.Amount / 100}</p><p>Status: ${sponsorship.IsSponsored ? `Sponsored by ${sponsorship.SponsorName}` : 'Available'}</p><button onclick="toggleSponsorshipStatus(${sponsorship.SponsorshipID}, ${!sponsorship.IsSponsored})">Toggle Status</button><button onclick="deleteSponsorship(${sponsorship.SponsorshipID})">Delete</button></div>`).join('');
+    if (!sponsorships || sponsorships.length === 0) {
+        list.innerHTML = '<p>No sponsorships available.</p>';
+        return;
+    }
+    list.innerHTML = sponsorships.map(sponsorship => `
+        <div>
+            <p>ID: ${sponsorship.sponsorshipid || 'N/A'} - ${sponsorship.typedetail || 'No Detail'} - $${sponsorship.amount ? (sponsorship.amount / 100).toFixed(2) : 'N/A'}</p>
+            <p>Status: ${sponsorship.issponsored ? `Sponsored by ${sponsorship.sponsorname || 'Unknown'}` : 'Available'}</p>
+            <button onclick="toggleSponsorshipStatus(${sponsorship.sponsorshipid}, ${!sponsorship.issponsored})">Toggle Status</button>
+            <button onclick="deleteSponsorship(${sponsorship.sponsorshipid})">Delete</button>
+        </div>
+    `).join('');
 }
 
 async function deleteSefer(seferId) {
@@ -140,7 +162,7 @@ async function deleteSponsorship(sponsorshipId) {
         const response = await apiRequest(`/api/sponsorships/${sponsorshipId}`, { method: 'DELETE' });
         if (response.message) {
             alert('Sponsorship deleted successfully!');
-            fetchSponsorships('all');  // Refresh the list
+            fetchSponsorships('all');
         }
     } catch (error) {
         alert('Error deleting sponsorship: ' + error.message);

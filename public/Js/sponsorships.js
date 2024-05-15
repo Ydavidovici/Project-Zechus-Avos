@@ -1,6 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
     const seferId = document.body.getAttribute('data-sefer-id');
-    loadSponsorships(seferId);
+    if (seferId) {
+        loadSponsorships(seferId);
+    } else {
+        console.error('No sefer ID found on the page.');
+    }
 });
 
 async function fetchAvailableSponsorships(seferId) {
@@ -8,10 +12,6 @@ async function fetchAvailableSponsorships(seferId) {
         const response = await fetch(`/api/sponsorships?isSponsored=false&seferId=${seferId}`);
         if (!response.ok) throw new Error('Failed to fetch sponsorships');
         const { data } = await response.json();
-
-        // Log the response data for debugging
-        console.log('Fetched Sponsorships:', data);
-
         return data;
     } catch (error) {
         alert('Could not load sponsorships.');
@@ -24,29 +24,32 @@ async function loadSponsorships(seferId) {
         const sponsorships = await fetchAvailableSponsorships(seferId);
         sponsorships.forEach(sponsorship => displaySponsorship(sponsorship));
     } catch (error) {
-        logMessage(`Load Error: ${error.message}`);
+        console.error(`Load Error: ${error.message}`);
     }
 }
 
 function displaySponsorship(sponsorship) {
     const container = document.getElementById('sponsorshipsList');
-    if (typeof sponsorship.Amount !== 'number') {
-        console.error('Invalid sponsorship amount:', sponsorship.Amount);
-        return;
-    }
-    const formattedAmount = formatCurrency(sponsorship.Amount);
+    const formattedAmount = formatCurrency(sponsorship.amount);
     const sponsorshipElement = document.createElement('div');
     sponsorshipElement.innerHTML = `
-        <p>${sponsorship.TypeDetail} - ${formattedAmount}</p>
-        <button id="sponsorBtn-${sponsorship.SponsorshipID}">Sponsor This</button>
+        <p>${sponsorship.typedetail} - ${formattedAmount}</p>
+        <button id="sponsorBtn-${sponsorship.sponsorshipid}">Sponsor This</button>
     `;
     container.appendChild(sponsorshipElement);
 
-    document.getElementById(`sponsorBtn-${sponsorship.SponsorshipID}`).addEventListener('click', () => {
+    document.getElementById(`sponsorBtn-${sponsorship.sponsorshipid}`).addEventListener('click', () => {
         openModal(sponsorship);
     });
 }
 
+function formatCurrency(amount) {
+    if (amount === undefined || isNaN(amount)) {
+        console.error('Invalid amount:', amount);
+        return 'Invalid amount';
+    }
+    return `$${(amount / 100).toFixed(2)}`;
+}
 
 function openModal(sponsorship) {
     const modal = document.getElementById('sponsorModal');
@@ -67,45 +70,66 @@ async function submitSponsorship() {
     const sponsorship = JSON.parse(sessionStorage.getItem('currentSponsorship'));
     const sponsorName = document.getElementById('sponsorName').value.trim();
     const forWhom = document.getElementById('forWhom').value.trim();
+
     if (!sponsorName || !forWhom || !sponsorship) {
         alert('Please fill in all required fields.');
         return;
     }
+
     const items = [{
-        description: `Sponsorship for ${sponsorship.TypeDetail}: ${forWhom} by ${sponsorName}`,
-        amount: sponsorship.Amount,
-        metadata: { sponsorName, forWhom, sponsorshipId: sponsorship.SponsorshipID }
+        price_data: {
+            currency: 'usd',
+            product_data: {
+                name: `Sponsorship for ${sponsorship.typedetail}: ${forWhom} by ${sponsorName}`
+            },
+            unit_amount: sponsorship.amount
+        },
+        quantity: 1
     }];
+
+    const metadata = {
+        sponsorshipId: sponsorship.sponsorshipid,
+        sponsorName: sponsorName,
+        forWhom: forWhom
+    };
+
     try {
-        const session = await createStripeSession(items);
-        if (session.url) {
-            window.location.href = session.url;
-        } else {
-            alert('Failed to redirect to checkout.');
+        const response = await fetch('/create-checkout-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                items,
+                metadata,
+                successUrl: window.location.origin + '/html/success.html',
+                cancelUrl: window.location.origin + '/html/cancel.html'
+            })
+        });
+
+        const jsonResponse = await response.json();
+        if (!response.ok) {
+            throw new Error('Failed to create checkout session: ' + jsonResponse.error);
         }
+
+        window.location.href = jsonResponse.url;
     } catch (error) {
         alert('Failed to initiate checkout. Please try again.');
     }
 }
 
-function formatCurrency(amount) {
-    return `$${(amount / 100).toFixed(2)}`;
-}
-
 async function createStripeSession(items) {
     const sponsorship = JSON.parse(sessionStorage.getItem('currentSponsorship'));
     try {
-        const response = await fetch('/api/create-checkout-session', {
+        const response = await fetch('/create-checkout-session', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 items,
                 metadata: {
-                    sponsorshipId: sponsorship.SponsorshipID,
+                    sponsorshipId: sponsorship.sponsorshipid,
                     sponsorName: document.getElementById('sponsorName').value.trim(),
                     forWhom: document.getElementById('forWhom').value.trim()
                 },
-                successUrl: window.location.origin + '/success',
+                successUrl: window.location.origin + '/success.html',
                 cancelUrl: window.location.href
             })
         });
@@ -115,6 +139,7 @@ async function createStripeSession(items) {
         }
         return jsonResponse;
     } catch (error) {
+        console.error('Error in createStripeSession:', error);
         throw error;
     }
 }

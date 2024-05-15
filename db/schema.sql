@@ -85,8 +85,8 @@ INSERT INTO Sponsorships (SeferID, Type, TypeDetail, Amount, IsSponsored, Paymen
 
 -- Inserting Cover sponsorships for 'Mekor Habracha' and 'Siach Eliezer'
     INSERT INTO Sponsorships (SeferID, Type, TypeDetail, Amount, IsSponsored, PaymentStatus) VALUES
-    (1, 'Cover', 'Book Cover', 1800000, FALSE, 'Unpaid'),
-(2, 'Cover', 'Book Cover', 500000, FALSE, 'Unpaid');
+    (1, 'Cover', 'Sefer Cover', 1800000, FALSE, 'Unpaid'),
+(2, 'Cover', 'Sefer Cover', 500000, FALSE, 'Unpaid');
 
 -- Inserting Parshah sponsorships for 'Siach Eliezer'
 INSERT INTO Sponsorships (SeferID, Type, TypeDetail, Amount, IsSponsored, PaymentStatus) VALUES

@@ -1,7 +1,7 @@
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const path = require('path');
 const app = express();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -17,10 +17,18 @@ const pool = new Pool({
     }
 });
 
-app.post('/webhook', express.raw({type: 'application/json'}), async (request, response) => {
+app.post('/webhook', express.raw({ type: 'application/json' }), async (request, response) => {
     const sig = request.headers['stripe-signature'];
+    let event;
+
     try {
-        const event = stripe.webhooks.constructEvent(request.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+        event = stripe.webhooks.constructEvent(request.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    } catch (err) {
+        console.error(`Webhook signature verification failed. Error: ${err.message}`);
+        return response.status(400).send(`Webhook signature verification failed. Error: ${err.message}`);
+    }
+
+    try {
         switch (event.type) {
             case 'checkout.session.completed':
                 await handleCheckoutSessionCompleted(event.data.object);
@@ -29,12 +37,35 @@ app.post('/webhook', express.raw({type: 'application/json'}), async (request, re
                 await updatePaymentStatus(event.data.object.id, 'Paid');
                 break;
             default:
-                console.log(`Unhandled event type ${event.type}`);
+                console.error(`Unhandled event type ${event.type}`);
         }
-        response.json({received: true});
+        response.json({ received: true });
     } catch (err) {
-        console.error(`Webhook Error: ${err.message}`);
-        response.status(400).send(`Webhook Error: ${err.message}`);
+        console.error(`Webhook handler error: ${err.message}`);
+        response.status(400).send(`Webhook handler error: ${err.message}`);
+    }
+});
+
+// Middleware to parse JSON
+app.use(express.json());
+
+app.post('/create-checkout-session', async (req, res) => {
+    const { items, metadata, successUrl, cancelUrl } = req.body;
+
+    try {
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: items,
+            mode: 'payment',
+            success_url: successUrl,
+            cancel_url: cancelUrl,
+            metadata: metadata
+        });
+
+        res.json({ id: session.id, url: session.url });
+    } catch (error) {
+        console.error("Error creating checkout session:", error.message);
+        res.status(500).json({ error: error.message });
     }
 });
 
@@ -42,7 +73,6 @@ async function updatePaymentStatus(paymentIntentId, status) {
     const sql = `UPDATE Sponsorships SET PaymentStatus = $1 WHERE PaymentIntentID = $2`;
     try {
         await pool.query(sql, [status, paymentIntentId]);
-        console.log(`Payment status updated to ${status} for PaymentIntent ID: ${paymentIntentId}`);
     } catch (err) {
         console.error(`Error updating payment status: ${err.message}`);
     }
@@ -62,13 +92,11 @@ async function updateSponsorshipStatus(sponsorshipId, status, sponsorName, forWh
     const sql = `UPDATE Sponsorships SET PaymentStatus = $1, SponsorName = $2, ForWhom = $3, IsSponsored = true WHERE SponsorshipID = $4`;
     try {
         await pool.query(sql, [status, sponsorName, forWhom, sponsorshipId]);
-        console.log(`Sponsorship ${sponsorshipId} updated with status ${status}`);
     } catch (err) {
         console.error(`Failed to update sponsorship: ${err.message}`);
     }
 }
 
-app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -90,7 +118,6 @@ app.get('/test-db', async (req, res) => {
         const result = await pool.query('SELECT NOW()');
         res.json({ message: 'Database connected', time: result.rows[0] });
     } catch (err) {
-        console.error('Database connection error:', err);
         res.status(500).json({ message: 'Database connection error', error: err.message });
     }
 });
@@ -145,24 +172,28 @@ app.get('/api/sponsorships', async (req, res) => {
     const { seferId, isSponsored } = req.query;
     let query = "SELECT * FROM Sponsorships WHERE 1=1";
     const params = [];
+
     if (seferId) {
         query += " AND SeferID = $1";
-        params.push(seferId);
+        params.push(parseInt(seferId, 10));
     }
+
     if (isSponsored !== undefined) {
-        query += " AND IsSponsored = $2";
-        params.push(isSponsored === 'true' ? true : false);
+        if (params.length > 0) {
+            query += " AND IsSponsored = $" + (params.length + 1);
+        } else {
+            query += " AND IsSponsored = $1";
+        }
+        params.push(isSponsored === 'true');
     }
+
     try {
         const result = await pool.query(query, params);
-        console.log('Sponsorships fetched:', result.rows); // Add logging here
         res.json({ message: "success", data: result.rows });
     } catch (err) {
-        console.error('Error fetching sponsorships:', err.message);
         res.status(400).json({ error: err.message });
     }
 });
-
 
 app.post('/api/sponsorships', async (req, res) => {
     const { SeferID, Type, TypeDetail, Amount, IsSponsored, SponsorName, SponsorContact, ForWhom, PaymentStatus, PaymentIntentID } = req.body;
@@ -224,7 +255,6 @@ app.post('/login', async (req, res) => {
             const match = await bcrypt.compare(password, result.rows[0].password);
             if (match) {
                 req.session.user = { username };
-                console.log('Session created:', req.session.user); // Log session creation
                 return res.json({ success: true, message: "Login successful!" });
             } else {
                 return res.status(401).json({ message: "Invalid credentials" });
@@ -233,13 +263,10 @@ app.post('/login', async (req, res) => {
             return res.status(401).json({ message: "Invalid credentials" });
         }
     } catch (err) {
-        console.error("Database error:", err);
         return res.status(500).json({ message: "Internal server error" });
     }
 });
 
-
-// Protect admin route
 app.get('/admin', (req, res) => {
     if (!req.session.user) {
         return res.redirect('/login');
@@ -275,8 +302,6 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-    console.error('Error:', err.message);
-    console.error('Stack:', err.stack);
     return res.status(500).send('Something broke!');
 });
 
