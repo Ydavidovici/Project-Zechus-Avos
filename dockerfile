@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install --production
+RUN npm install --production || cat /root/.npm/_logs/*-debug-0.log
 
 # Ensure bcrypt is rebuilt for the correct architecture
 RUN npm rebuild bcrypt --build-from-source
