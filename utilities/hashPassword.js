@@ -10,7 +10,7 @@ const pool = new Pool({
 });
 
 const username = 'admin1';
-const password = 'admin1'; // Use a more secure password in production
+const password = 'admin1';
 
 bcrypt.hash(password, 10, async (err, hash) => {
     if (err) {
