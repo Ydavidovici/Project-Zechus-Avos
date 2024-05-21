@@ -85,7 +85,7 @@ INSERT INTO Sponsorships (SeferID, Type, TypeDetail, Amount, IsSponsored, Paymen
 
 -- Inserting Cover sponsorships for 'Mekor Habracha' and 'Siach Eliezer'
     INSERT INTO Sponsorships (SeferID, Type, TypeDetail, Amount, IsSponsored, PaymentStatus) VALUES
-    (1, 'Cover', 'Sefer Cover', 1800000, FALSE, 'Unpaid'),
+    (1, 'Cover', 'Sefer Cover', 2600000, FALSE, 'Unpaid'),
 (2, 'Cover', 'Sefer Cover', 500000, FALSE, 'Unpaid');
 
 -- Inserting Parshah sponsorships for 'Siach Eliezer'
@@ -116,5 +116,7 @@ INSERT INTO Sponsorships (SeferID, Type, TypeDetail, Amount, IsSponsored, Paymen
                                                                                              (2, 'Parshah', 'Vayikra', 240000, FALSE, 'Unpaid'),
                                                                                              (2, 'Parshah', 'Tzav', 240000, FALSE, 'Unpaid'),
                                                                                              (2, 'Parshah', 'Shemini', 240000, FALSE, 'Unpaid');
-
+-- Inserting admin credentials
+INSERT INTO Admins (username, password) VALUES
+    ('admin1', '$2a$10$rUsjFci3NBsNyDX3ElunD.yA8dVvJ.rGKB2M.bZq4be7dfOm.aure');
 COMMIT;

@@ -1,12 +1,10 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
 require('dotenv').config(); // Ensure your .env file is properly configured
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false
-    }
+    ssl: false
 });
 
 const username = 'admin1';
