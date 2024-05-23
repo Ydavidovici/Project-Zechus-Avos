@@ -127,6 +127,17 @@ app.get('/test-file', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'html', 'index.html'));
 });
 
+app.get('/debug', (req, res) => {
+    const workingDirectory = __dirname;
+    const publicHtmlPath = path.join(__dirname, 'public', 'html');
+    fs.readdir(publicHtmlPath, (err, files) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json({ workingDirectory, files });
+    });
+});
+
 // List files in the public/html directory
 app.get('/list-files', (req, res) => {
     const directoryPath = path.join(__dirname, 'public', 'html');
