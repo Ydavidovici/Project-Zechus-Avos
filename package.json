@@ -1,45 +1,23 @@
 {
-  "name": "project_zechus_avos",
+  "name": "project-zechus-avos",
   "version": "1.0.0",
-  "description": "",
+  "description": "Project Zechus Avos",
   "main": "index.js",
-  "directories": {
-    "test": "tests"
-  },
-  "nodemonConfig": {
-    "watch": [
-      "src/",
-      "index.js"
-    ],
-    "ignore": [
-      "*.db",
-      "node_modules/"
-    ]
-  },
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
-    "test": "jest"
-  },
-  "jest": {
-    "testEnvironment": "jsdom",
-    "setupFiles": [
-      "jest-fetch-mock/setup"
-    ]
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "nodemon": "^3.1.0"
+    "dev": "nodemon index.js"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "express": "^4.17.1",
+    "pg": "^8.7.1",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "express-session": "^1.18.0",
-    "pg": "^8.9.0",
-    "stripe": "^14.25.0"
+    "bcryptjs": "^2.4.3",
+    "path": "^0.12.7",
+    "stripe": "^8.174.0",
+    "dotenv": "^10.0.0",
+    "express-session": "^1.17.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
   }
 }
