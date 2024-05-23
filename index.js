@@ -297,6 +297,8 @@ app.get('/success', (req, res) => {
     return res.sendFile(path.join(__dirname, 'public', 'html', 'success.html'));
 });
 
+app.get('/favicon.ico', (req, res) => res.status(204));
+
 app.use((req, res, next) => {
     return res.status(404).send('Sorry can’t find that!');
 });
