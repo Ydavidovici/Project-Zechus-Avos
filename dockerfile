@@ -16,6 +16,9 @@ RUN npm rebuild bcrypt --build-from-source
 # Copy local code to the container image.
 COPY . .
 
+# Debugging step to ensure files are copied correctly
+RUN ls -R /usr/src/app/public
+
 # Expose the port on which the app runs
 EXPOSE 3000
 
