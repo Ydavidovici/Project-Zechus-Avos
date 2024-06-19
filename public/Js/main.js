@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sponsorshipButton = document.getElementById('sponsorship-info-button');
     const sponsorshipInfo = document.getElementById('sponsorship-info');
 
-    // Assuming you have a button to show more info about sponsorships
+
     if (sponsorshipButton && sponsorshipInfo) {
         sponsorshipInfo.style.display = 'none'; // Initially hide the info
         sponsorshipButton.addEventListener('click', () => {
