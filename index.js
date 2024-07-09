@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 const app = express();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const PORT = process.env.PORT || 80;
+const PORT = process.env.PORT || 3000;
 const session = require('express-session');
 const fs = require('fs');
 require('dotenv').config();
@@ -308,6 +308,22 @@ app.get('/', (req, res) => {
 
 app.get('/success', (req, res) => {
     return res.sendFile(path.join(__dirname, 'public', 'HTML', 'success.html'));
+});
+
+app.get('/mekor-habracha', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'html', 'mekor-habracha.html'));
+});
+
+app.get('/siach-eliezer', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'html', 'siach-eliezer.html'));
+});
+
+app.get('/failure', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'html', 'failure.html'));
+});
+
+app.get('/contact', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'html', 'contact.html'));
 });
 
 app.get('/favicon.ico', (req, res) => res.status(204));
