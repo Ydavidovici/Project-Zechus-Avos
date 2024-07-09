@@ -8,6 +8,74 @@
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/webhook",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/create-checkout-session",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/login",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/admin",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/logout",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/success",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/test-db",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/test-file",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/debug",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/list-files",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/contact",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/cancel",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/failure",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/mekor-habracha",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/siach-eliezer",
+      "dest": "/index.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.js"
     }
