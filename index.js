@@ -125,14 +125,14 @@ app.get('/test-db', async (req, res) => {
 
 // Test static file serving
 app.get('/test-file', (req, res) => {
-    const filePath = path.join(__dirname, 'public', 'HTML', 'index.html');
+    const filePath = path.join(__dirname, 'public', 'html', 'index.html');
     console.log(`Attempting to serve file from: ${filePath}`);
     res.sendFile(filePath);
 });
 
 app.get('/debug', (req, res) => {
     const workingDirectory = __dirname;
-    const publicHtmlPath = path.join(__dirname, 'public', 'HTML');
+    const publicHtmlPath = path.join(__dirname, 'public', 'html');
     fs.readdir(publicHtmlPath, (err, files) => {
         if (err) {
             return res.status(500).json({ error: err.message });
@@ -143,7 +143,7 @@ app.get('/debug', (req, res) => {
 
 // List files in the public/html directory
 app.get('/list-files', (req, res) => {
-    const directoryPath = path.join(__dirname, 'public', 'HTML');
+    const directoryPath = path.join(__dirname, 'public', 'html');
     fs.readdir(directoryPath, (err, files) => {
         if (err) {
             return res.status(500).json({ error: 'Unable to scan directory' });
@@ -285,7 +285,7 @@ app.get('/admin', (req, res) => {
     if (!req.session.user) {
         return res.redirect('/login');
     } else {
-        return res.sendFile(path.join(__dirname, 'public', 'HTML', 'admin.html'));
+        return res.sendFile(path.join(__dirname, 'public', 'html', 'admin.html'));
     }
 });
 
@@ -300,31 +300,31 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-    return res.sendFile(path.join(__dirname, 'public', 'HTML', 'login.html'));
+    return res.sendFile(path.join(__dirname, 'public', 'html', 'login.html'));
 });
 
 app.get('/', (req, res) => {
-    return res.sendFile(path.join(__dirname, 'public', 'HTML', 'index.html'));
+    return res.sendFile(path.join(__dirname, 'public', 'html', 'index.html'));
 });
 
 app.get('/success', (req, res) => {
-    return res.sendFile(path.join(__dirname, 'public', 'HTML', 'success.html'));
+    return res.sendFile(path.join(__dirname, 'public', 'html', 'success.html'));
 });
 
 app.get('/mekor-habracha', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'HTML', 'mekor-habracha.html'));
+    res.sendFile(path.join(__dirname, 'public', 'html', 'mekor-habracha.html'));
 });
 
 app.get('/siach-eliezer', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'HTML', 'siach-eliezer.html'));
+    res.sendFile(path.join(__dirname, 'public', 'html', 'siach-eliezer.html'));
 });
 
 app.get('/failure', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'HTML', 'failure.html'));
+    res.sendFile(path.join(__dirname, 'public', 'html', 'failure.html'));
 });
 
 app.get('/contact', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'HTML', 'contact.html'));
+    res.sendFile(path.join(__dirname, 'public', 'html', 'contact.html'));
 });
 
 app.get('/debug', (req, res) => {
