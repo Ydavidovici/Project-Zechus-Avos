@@ -20,7 +20,7 @@ COPY . .
 RUN ls -R /usr/src/app/public
 
 # Expose the port on which the app runs
-EXPOSE 3000
+EXPOSE 80
 
 # Run the web service on container startup.
 CMD [ "node", "index.js" ]
