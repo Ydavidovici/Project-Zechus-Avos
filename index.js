@@ -9,6 +9,8 @@ const PORT = process.env.PORT || 3000;
 const session = require('express-session');
 const fs = require('fs');
 require('dotenv').config();
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
@@ -99,7 +101,6 @@ async function updateSponsorshipStatus(sponsorshipId, status, sponsorName, forWh
 
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
     secret: process.env.SESSION_SECRET,
@@ -326,11 +327,23 @@ app.get('/contact', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'html', 'contact.html'));
 });
 
+app.get('/debug', (req, res) => {
+    const publicHtmlPath = path.join(__dirname, 'public', 'html');
+    fs.readdir(publicHtmlPath, (err, files) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json({ workingDirectory: publicHtmlPath, files });
+    });
+});
+
 app.get('/favicon.ico', (req, res) => res.status(204));
 
 app.use((req, res, next) => {
-    return res.status(404).send('Sorry can’t find that!');
+    console.log(`404 Error: Resource not found at ${req.originalUrl}`);
+    res.status(404).send(`Sorry, can't find that! Requested resource: ${req.originalUrl}`);
 });
+
 
 app.use((err, req, res, next) => {
     console.error('Error:', err.stack);
