@@ -312,19 +312,19 @@ app.get('/success', (req, res) => {
 });
 
 app.get('/mekor-habracha', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'html', 'mekor-habracha.html'));
+    res.sendFile(path.join(__dirname, 'public', 'HTML', 'mekor-habracha.html'));
 });
 
 app.get('/siach-eliezer', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'html', 'siach-eliezer.html'));
+    res.sendFile(path.join(__dirname, 'public', 'HTML', 'siach-eliezer.html'));
 });
 
 app.get('/failure', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'html', 'failure.html'));
+    res.sendFile(path.join(__dirname, 'public', 'HTML', 'failure.html'));
 });
 
 app.get('/contact', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'html', 'contact.html'));
+    res.sendFile(path.join(__dirname, 'public', 'HTML', 'contact.html'));
 });
 
 app.get('/debug', (req, res) => {
